@@ -12,7 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using ProEventos.API.Data;
+using ProEventos.Application;
+using ProEventos.Application.Contratos;
+using ProEventos.Domain;
+using ProEventos.Persistence;
+using ProEventos.Persistence.Contexto;
+using ProEventos.Persistence.Contratos;
+
 
 namespace ProEventos.API
 {
@@ -28,11 +34,14 @@ namespace ProEventos.API
         // Este método serve para adicionar serviços ao container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(
+            services.AddDbContext<ProEventosContext>(
                 context => context.UseSqlite(Configuration.GetConnectionString("Default"))
             );
             
             services.AddControllers();
+            services.AddScoped<IEventoService, EventoService>();
+            services.AddScoped<IGeralPersist, GeralPersist>();
+            services.AddScoped<IEventosPersist, EventosPersist>();
             services.AddCors();
             services.AddSwaggerGen(c =>
             {
