@@ -3,7 +3,8 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProEventos.Persistence.Contexto;
+using ProEventos.Persistence;
+using ProEventos.Persistence.Contextos;
 
 namespace ProEventos.Persistence.Migrations
 {
@@ -60,7 +61,7 @@ namespace ProEventos.Persistence.Migrations
                     b.Property<DateTime?>("DataInicio")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("EventoId")
+                    b.Property<int>("EventoId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Nome")
@@ -79,7 +80,7 @@ namespace ProEventos.Persistence.Migrations
                     b.ToTable("Lotes");
                 });
 
-            modelBuilder.Entity("ProEventos.Domain.Palestrantes", b =>
+            modelBuilder.Entity("ProEventos.Domain.Palestrante", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,7 +106,7 @@ namespace ProEventos.Persistence.Migrations
                     b.ToTable("Palestrantes");
                 });
 
-            modelBuilder.Entity("ProEventos.Domain.PalestrantesEvento", b =>
+            modelBuilder.Entity("ProEventos.Domain.PalestranteEvento", b =>
                 {
                     b.Property<int>("EventoId")
                         .HasColumnType("INTEGER");
@@ -150,13 +151,15 @@ namespace ProEventos.Persistence.Migrations
             modelBuilder.Entity("ProEventos.Domain.Lote", b =>
                 {
                     b.HasOne("ProEventos.Domain.Evento", "Evento")
-                        .WithMany("Lote")
-                        .HasForeignKey("EventoId");
+                        .WithMany("Lotes")
+                        .HasForeignKey("EventoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Evento");
                 });
 
-            modelBuilder.Entity("ProEventos.Domain.PalestrantesEvento", b =>
+            modelBuilder.Entity("ProEventos.Domain.PalestranteEvento", b =>
                 {
                     b.HasOne("ProEventos.Domain.Evento", "Evento")
                         .WithMany("PalestrantesEventos")
@@ -164,7 +167,7 @@ namespace ProEventos.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProEventos.Domain.Palestrantes", "Palestrante")
+                    b.HasOne("ProEventos.Domain.Palestrante", "Palestrante")
                         .WithMany("PalestrantesEventos")
                         .HasForeignKey("PalestranteId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -178,11 +181,11 @@ namespace ProEventos.Persistence.Migrations
             modelBuilder.Entity("ProEventos.Domain.RedeSocial", b =>
                 {
                     b.HasOne("ProEventos.Domain.Evento", "Evento")
-                        .WithMany("RedeSocial")
+                        .WithMany("RedesSociais")
                         .HasForeignKey("EventoId");
 
-                    b.HasOne("ProEventos.Domain.Palestrantes", "Palestrante")
-                        .WithMany("RedeSocial")
+                    b.HasOne("ProEventos.Domain.Palestrante", "Palestrante")
+                        .WithMany("RedesSociais")
                         .HasForeignKey("PalestranteId");
 
                     b.Navigation("Evento");
@@ -192,18 +195,18 @@ namespace ProEventos.Persistence.Migrations
 
             modelBuilder.Entity("ProEventos.Domain.Evento", b =>
                 {
-                    b.Navigation("Lote");
+                    b.Navigation("Lotes");
 
                     b.Navigation("PalestrantesEventos");
 
-                    b.Navigation("RedeSocial");
+                    b.Navigation("RedesSociais");
                 });
 
-            modelBuilder.Entity("ProEventos.Domain.Palestrantes", b =>
+            modelBuilder.Entity("ProEventos.Domain.Palestrante", b =>
                 {
                     b.Navigation("PalestrantesEventos");
 
-                    b.Navigation("RedeSocial");
+                    b.Navigation("RedesSociais");
                 });
 #pragma warning restore 612, 618
         }

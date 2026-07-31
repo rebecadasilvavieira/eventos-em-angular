@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace ProEventos.Domain
 {
     public class RedeSocial
@@ -13,7 +8,6 @@ namespace ProEventos.Domain
         public int? EventoId { get; set; }
         public Evento Evento { get; set; }
         public int? PalestranteId { get; set; }
-         public Palestrantes Palestrante { get; set; }
-
+        public Palestrante Palestrante { get; set; }
     }
 }
