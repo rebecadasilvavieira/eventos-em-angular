@@ -1,7 +1,7 @@
 <app-titulo [titulo]="'Perfil'"></app-titulo>
 
 <div class="card rounded shadow-sm">
-<form>
+<<form [formGroup]="form">>
 	<div class="row p-3">
 		<div class="col-lg-3 pt-1">
 			<div class="card mb-3">
@@ -95,20 +95,52 @@
 				<p>Caso mude de senha, preencha os campos abaixo:</p>
 			</div>
 			<div class="form-row">
-				<div class="form-group col-sm">
-					<label>Senha</label>
-					<input type="password" class="form-control" />
-				</div>
-				<div class="form-group col-sm">
-					<label>Confirmar Senha</label>
-					<input type="password" class="form-control" />
-				</div>
-			</div>
-		</div>
+  <div class="form-group col-sm-6">
+    <label>Senha</label>
+
+    <input
+      class="form-control"
+      type="password"
+      formControlName="senha"
+      [ngClass]="{'is-invalid': f.senha.errors && f.senha.touched}"
+      placeholder="Digite uma Senha">
+
+    <div *ngIf="f.senha.errors?.required && f.senha.touched"
+      class="invalid-feedback">
+      Senha é obrigatório.
+    </div>
+
+    <div *ngIf="f.senha.errors?.minlength && f.senha.touched"
+      class="invalid-feedback">
+      Deve conter no mínimo 6 caracteres.
+    </div>
+  </div>
+
+  <div class="form-group col-sm-6">
+    <label>Confirmar Senha</label>
+
+    <input
+      class="form-control"
+      type="password"
+      formControlName="confirmeSenha"
+      [ngClass]="{'is-invalid': f.confirmeSenha.errors && f.confirmeSenha.touched}"
+      placeholder="Confirmar Senha">
+
+    <div *ngIf="f.confirmeSenha.errors?.required && f.confirmeSenha.touched"
+      class="invalid-feedback">
+      Confirmar Senha é obrigatório.
+    </div>
+
+    <div *ngIf="f.confirmeSenha.errors?.mustMatch && f.confirmeSenha.touched"
+      class="invalid-feedback">
+      As senhas devem ser iguais.
+    </div>
+  </div>
+</div>
 	</div>
 	<div class="card-footer">
 		<div class="d-flex">
-			<button class="btn btn-outline-secondary mr-auto border">
+			<button (click)="resetForm($event)" class="btn btn-outline-secondary mr-auto border">
 				Cancelar Alteração
 			</button>
 			<button class="btn btn-success">
@@ -117,5 +149,5 @@
 			</button>
 		</div>
 	</div>
-</form>
+
 </div>
