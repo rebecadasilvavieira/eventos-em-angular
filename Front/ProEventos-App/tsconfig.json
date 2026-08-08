@@ -6,7 +6,6 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "strictPropertyInitialization": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
@@ -17,13 +16,17 @@
       "es2018",
       "dom"
     ],
-    "paths":{
-      "@app/*": ["src/app/*"],
-      "@environments/*": ["src/environments/*"]
-    }
+    "paths": {
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@environments/*": [
+        "src/environments/*"
+      ]
+    },
   },
   "angularCompilerOptions": {
-    "strictTemplates": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    "strictTemplates": true
   }
 }

@@ -21,7 +21,9 @@ import { PalestrantesComponent } from './components/palestrantes/palestrantes.co
 import { PerfilComponent } from './components/user/perfil/perfil.component';
 import { NavComponent } from './shared/nav/nav.component';
 import { TituloComponent } from './shared/titulo/titulo.component';
+
 import { EventoService } from './services/evento.service';
+
 import { DateTimeFormatPipe } from './helpers/DateTimeFormat.pipe';
 import { EventoDetalheComponent } from './components/eventos/evento-detalhe/evento-detalhe.component';
 import { EventoListaComponent } from './components/eventos/evento-lista/evento-lista.component';

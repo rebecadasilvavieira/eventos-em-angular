@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-eventos',
@@ -7,7 +7,9 @@ import { Component, OnInit, TemplateRef } from '@angular/core';
   // providers: [EventoService]
 })
 export class EventosComponent implements OnInit {
+
   ngOnInit(): void {
+
   }
 
 }

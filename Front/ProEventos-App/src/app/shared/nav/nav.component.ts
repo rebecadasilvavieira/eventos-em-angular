@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-nav',
@@ -13,8 +13,8 @@ export class NavComponent implements OnInit {
   ngOnInit(): void {
   }
 
-showMenu(): boolean {
-  return this.router.url !== '/user/login';
+  showMenu(): boolean {
+    return this.router.url !== '/user/login';
+  }
 
-}
 }
