@@ -57,6 +57,7 @@ export class EventoListaComponent implements OnInit {
   }
 
   public getEventos(): void {
+
     this.eventoService.getEventos().subscribe({
       next: (eventos: Evento[]) => {
         this.eventos = eventos;
