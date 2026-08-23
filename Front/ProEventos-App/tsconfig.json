@@ -23,9 +23,10 @@
       "@environments/*": [
         "src/environments/*"
       ]
-    },
+    }
   },
   "angularCompilerOptions": {
+
     "strictInjectionParameters": true,
     "strictTemplates": true
   }
