@@ -56,7 +56,7 @@ public async Task<SignInResult> CheckUserPasswordAsync(
         );
     }
 }
-    public async Task<UserDto> CreateAccountAsync(UserDto userDto)
+    public async Task<UserUpdateDto> CreateAccountAsync(UserDto userDto)
 {
     try
     {
@@ -65,7 +65,7 @@ public async Task<SignInResult> CheckUserPasswordAsync(
 
         if (result.Succeeded)
         {
-            var userToReturn = _mapper.Map<UserDto>(user);
+            var userToReturn = _mapper.Map<UserUpdateDto>(user);
             return userToReturn;
         }
             return null;
@@ -82,7 +82,7 @@ public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
 {
     try
     {
-        var user = await _userPersist.GetUserByUsernameAsync(userName);
+        var user = await _userPersist.GetUserByUserNameAsync(userName);
         if (user == null) return null;
 
         var userUpdateDto = _mapper.Map<UserUpdateDto>(user);
@@ -101,19 +101,22 @@ public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
         {
             try
             {
-                var user = await _userPersist.GetUserByUsernameAsync(userUpdateDto.UserName);
+                var user = await _userPersist.GetUserByUserNameAsync(userUpdateDto.UserName);
                 if (user == null) return null;
 
-                _mapper.Map(userUpdateDto, user);
+                userUpdateDto.Id = user.Id;
 
+                _mapper.Map(userUpdateDto, user);
+                if(userUpdateDto.Password != null){
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var result = await _userManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
+                await _userManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
+        }
 
                 _userPersist.Update<User>(user);
 
                 if (await _userPersist.SaveChangesAsync())
                 {
-                    var userRetorno = await _userPersist.GetUserByUsernameAsync(user.UserName);
+                    var userRetorno = await _userPersist.GetUserByUserNameAsync(user.UserName);
 
                     return _mapper.Map<UserUpdateDto>(userRetorno);
                 }
@@ -131,8 +134,13 @@ public async Task<bool> UserExists(string userName)
 {
     try
     {
+        if (string.IsNullOrWhiteSpace(userName))
+            return false;
+
+        var userNameLower = userName.ToLower();
+
         return await _userManager.Users
-            .AnyAsync(user => user.UserName == userName.ToLower());
+            .AnyAsync(user => user.UserName.ToLower() == userNameLower);
     }
     catch (System.Exception ex)
     {

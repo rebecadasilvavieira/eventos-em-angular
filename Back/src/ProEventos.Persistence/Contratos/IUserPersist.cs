@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ProEventos.Domain.Identity;
 
@@ -12,7 +10,6 @@ namespace ProEventos.Persistence.Contratos
 
         Task<User> GetUserByIdAsync(int id);
 
-        Task<User> GetUserByUsernameAsync(string username);
-        Task<Action<global::AutoMapper.IMappingOperationOptions<object, void>>> GetUserByUserNameAsync(string userName);
+        Task<User> GetUserByUserNameAsync(string userName);
     }
 }
