@@ -7,6 +7,7 @@ using static ProEventos.Application.Dtos.EventoDto;
 using AutoMapper;
 using ProEventos.Domain;
 using ProEventos.Domain.Identity;
+using ProEventos.Persistence.Models;
 
 
 namespace ProEventos.Application.Helpers
