@@ -1,0 +1,6 @@
+.palestrantes-selecao { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+.palestrantes-campo { flex: 1 1 220px; min-width: 0; }
+.palestrantes-campo select { height: 40px; }
+.palestrante-associado { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-top: 1px solid #e1e5e8; }
+.palestrante-associado span { overflow-wrap: anywhere; flex: 1 1 180px; }
+h2 { font-size: 1.5rem; }

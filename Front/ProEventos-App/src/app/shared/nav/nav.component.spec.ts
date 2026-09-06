@@ -2,6 +2,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { AccountService } from '@app/services/account.service';
 
 import { NavComponent } from './nav.component';
 
@@ -11,7 +14,9 @@ describe('NavComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ NavComponent ]
+      declarations: [ NavComponent ],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      providers: [AccountService]
     })
     .compileComponents();
   }));

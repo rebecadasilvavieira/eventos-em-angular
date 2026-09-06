@@ -8,14 +8,14 @@ import { EventoService } from '@app/services/evento.service';
 import { Pagination, PaginatedResult } from '@app/models/Pagination';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { environment } from '@environments/environment';
 
 @Component({
   selector: 'app-evento-lista',
   templateUrl: './evento-lista.component.html',
-  styleUrls: ['./evento-lista.component.scss']
+  styleUrls: ['./evento-lista.component.scss'],
 })
 export class EventoListaComponent implements OnInit {
-
   modalRef!: BsModalRef;
 
   public eventos: Evento[] = [];
@@ -36,20 +36,23 @@ export class EventoListaComponent implements OnInit {
       this.termBuscaChanged
         .pipe(debounceTime(1000))
         .subscribe((valor: string) => {
-          this.eventoService.getEventos(
-            this.pagination.currentPage,
-            this.pagination.itemsPerPage,
-            valor
-          ).subscribe({
-            next: (paginatedResult: PaginatedResult<Evento[]>) => {
-              this.eventos = paginatedResult.result;
-              this.pagination = paginatedResult.pagination;
-            },
-            error: (error: any) => {
-              this.spinner.hide();
-              this.toastr.error('Erro ao Carregar os Eventos', 'Erro!');
-            }
-          }).add(() => this.spinner.hide());
+          this.eventoService
+            .getEventos(
+              this.pagination.currentPage,
+              this.pagination.itemsPerPage,
+              valor
+            )
+            .subscribe({
+              next: (paginatedResult: PaginatedResult<Evento[]>) => {
+                this.eventos = paginatedResult.result;
+                this.pagination = paginatedResult.pagination;
+              },
+              error: () => {
+                this.spinner.hide();
+                this.toastr.error('Erro ao Carregar os Eventos', 'Erro!');
+              },
+            })
+            .add(() => this.spinner.hide());
         });
     }
 
@@ -62,7 +65,7 @@ export class EventoListaComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     private router: Router
-  ) { }
+  ) {}
 
   public ngOnInit(): void {
     this.pagination = {
@@ -78,17 +81,19 @@ export class EventoListaComponent implements OnInit {
   }
 
   public carregarEventos(): void {
-    this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage).subscribe(
-       (paginatedResult: PaginatedResult<Evento[]>) => {
-        this.eventos = paginatedResult.result;
-        this.pagination = paginatedResult.pagination;
-      },
-       (error: any) => {
-        this.spinner.hide();
-        this.toastr.error('Erro ao Carregar os Eventos', 'Erro!');
-      },
-    ).add( () => this.spinner.hide());
-
+    this.eventoService
+      .getEventos(this.pagination.currentPage, this.pagination.itemsPerPage)
+      .subscribe(
+        (paginatedResult: PaginatedResult<Evento[]>) => {
+          this.eventos = paginatedResult.result;
+          this.pagination = paginatedResult.pagination;
+        },
+        () => {
+          this.spinner.hide();
+          this.toastr.error('Erro ao Carregar os Eventos', 'Erro!');
+        }
+      )
+      .add(() => this.spinner.hide());
   }
 
   public openModal(
@@ -102,39 +107,33 @@ export class EventoListaComponent implements OnInit {
     this.eventoId = eventoId;
     this.numeroEvento = numeroEvento;
 
-    this.modalRef = this.modalService.show(
-      template,
-      { class: 'modal-sm' }
-    );
+    this.modalRef = this.modalService.show(template, { class: 'modal-sm' });
   }
-public pageChanged(event: any): void {
-  this.pagination.currentPage = event.page;
-  this.carregarEventos();
-}
+
+  public pageChanged(event: any): void {
+    this.pagination.currentPage = event.page;
+    this.carregarEventos();
+  }
+
   public confirm(): void {
     this.modalRef.hide();
     this.spinner.show();
 
-    this.eventoService.deleteEvento(this.eventoId).subscribe(
-      (result: any) => {
-        if (result.message === 'Deletado') {
-          this.toastr.success(
-            'O Evento foi deletado com Sucesso.',
-            'Deletado!'
-          );
-
-          this.carregarEventos();
+    this.eventoService
+      .deleteEvento(this.eventoId)
+      .subscribe(
+        (result: any) => {
+          if (result.message === 'Deletado') {
+            this.toastr.success('O Evento foi deletado com Sucesso.', 'Deletado!');
+            this.carregarEventos();
+          }
+        },
+        (error: any) => {
+          console.error(error);
+          this.toastr.error(`Erro ao tentar deletar o evento ${this.eventoId}`, 'Erro');
         }
-      },
-      (error: any) => {
-        console.error(error);
-
-        this.toastr.error(
-          `Erro ao tentar deletar o evento ${this.eventoId}`,
-          'Erro'
-        );
-      }
-    ).add(() => this.spinner.hide());
+      )
+      .add(() => this.spinner.hide());
   }
 
   public decline(): void {
@@ -145,4 +144,7 @@ public pageChanged(event: any): void {
     this.router.navigate([`eventos/detalhe/${id}`]);
   }
 
+  public imagemEvento(nome: string): string {
+    return nome ? environment.apiURL + 'resources/images/' + nome : 'assets/img/upload.png';
+  }
 }

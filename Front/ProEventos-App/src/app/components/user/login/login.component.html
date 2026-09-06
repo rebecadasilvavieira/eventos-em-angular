@@ -1,15 +1,22 @@
-<div class="mx-auto text-center shadow-sm bg-white rounded p-5 my-5">
+<main class="login-layout">
+  <section class="login-visual">
+    <p class="login-kicker">Conecta Tech Eventos</p>
+    <h1>Boas-vindas de volta.</h1>
+    <p>Entre para acompanhar sua programação, eventos e perfil em um só lugar.</p>
+    <img src="assets/img/Login.png" alt="Ilustração de acesso">
+  </section>
 
-  <form #loginForm="ngForm" class="form-signin" (ngSubmit)="login()">
-    <i class="fa fa-users mb-2"></i>
-
-    <h1 class="h3 mb-3 font-weight-normal">Entrar com</h1>
+  <section class="login-form-panel">
+    <form #loginForm="ngForm" class="form-signin" (ngSubmit)="login()">
+      <span class="login-icon"><i class="fa fa-users" aria-hidden="true"></i></span>
+      <p class="login-eyebrow">Acesso à conta</p>
+      <h2>Entrar</h2>
 
     <label for="username" class="sr-only">Usuário</label>
     <input
       [(ngModel)]="model.userName"
       name="username"
-      type="email"
+      type="text"
       id="username"
       class="form-control"
       placeholder="Usuário"
@@ -23,15 +30,14 @@
       type="password"
       id="password"
       class="form-control"
-      placeholder="Usuário"
+      placeholder="Senha"
 required
 >
 
 
 
 <button
-  [disabled]="!loginForm.valid"
-  class="btn btn-lg btn-primary btn-block"
+  class="btn btn-lg btn-login btn-block"
   type="submit">
   Entrar
 </button>
@@ -44,5 +50,6 @@ required
   Quero me cadastrar
 </a>
 
-</form>
-</div>
+    </form>
+  </section>
+</main>

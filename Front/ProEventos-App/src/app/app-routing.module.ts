@@ -29,7 +29,7 @@ const routes: Routes = [
         path: 'user/perfil',
         component: PerfilComponent,
       },
-      { path: 'eventos', redirectTo: 'eventos/lista' },
+      { path: 'eventos', redirectTo: 'eventos/lista', pathMatch: 'full' },
       {
         path: 'eventos',
         component: EventosComponent,

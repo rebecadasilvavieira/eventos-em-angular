@@ -22,7 +22,7 @@ namespace ProEventos.API.Controllers
         private readonly ITokenService _tokenService;
         private readonly IUtil _util;
 
-        private readonly string _destino = "Perfil";
+        private readonly string _destino = "Images";
 
         public AccountController(IAccountService accountService,
                                  ITokenService tokenService,

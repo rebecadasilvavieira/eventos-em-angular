@@ -2,3 +2,79 @@
   [titulo]="'Dashboard'"
   [iconClass]="'far fa-chart-bar'">
 </app-titulo>
+
+<section class="dashboard" aria-label="Resumo da plataforma">
+  <div class="dashboard-heading">
+    <div>
+      <p class="eyebrow">Visão geral</p>
+      <h1>O que está acontecendo</h1>
+      <p class="text-muted mb-0">Acompanhe eventos e palestrantes em um só lugar.</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/eventos/detalhe">
+      <i class="fas fa-plus mr-2"></i>Novo evento
+    </button>
+  </div>
+
+  <div class="row dashboard-stats" *ngIf="!carregando">
+    <div class="col-md-4 mb-3">
+      <article class="stat-card stat-card--blue">
+        <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+        <div><span>Eventos cadastrados</span><strong>{{ totalEventos }}</strong></div>
+      </article>
+    </div>
+    <div class="col-md-4 mb-3">
+      <article class="stat-card stat-card--gold">
+        <div class="stat-icon"><i class="fas fa-microphone"></i></div>
+        <div><span>Palestrantes</span><strong>{{ totalPalestrantes }}</strong></div>
+      </article>
+    </div>
+    <div class="col-md-4 mb-3">
+      <a class="stat-card stat-card--green" routerLink="/eventos/lista">
+        <div class="stat-icon"><i class="fas fa-arrow-right"></i></div>
+        <div><span>Acesso rápido</span><strong>Explorar</strong></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="dashboard-loading" *ngIf="carregando">
+    <i class="fas fa-circle-notch fa-spin"></i> Carregando resumo...
+  </div>
+
+  <div class="alert alert-danger" *ngIf="erro">
+    Não foi possível carregar o resumo agora.
+    <button class="btn btn-link p-0 ml-2" (click)="carregarResumo()">Tentar novamente</button>
+  </div>
+
+  <div class="row" *ngIf="!carregando && !erro">
+    <div class="col-lg-8 mb-4">
+      <section class="dashboard-panel events-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Agenda</p><h2>Próximos eventos</h2></div>
+          <a routerLink="/eventos/lista">Ver todos</a>
+        </div>
+
+        <div class="empty-state" *ngIf="eventos.length === 0">
+          <i class="far fa-calendar-times"></i>
+          <p>Nenhum próximo evento encontrado.</p>
+          <a routerLink="/eventos/detalhe">Cadastre o primeiro evento</a>
+        </div>
+
+        <button class="event-row" *ngFor="let evento of eventos" (click)="abrirEvento(evento.id)">
+          <img [src]="getImagemURL(evento.imagemURL)" [alt]="evento.tema">
+          <span class="event-date"><strong>{{ dataEvento(evento) | date:'dd' }}</strong><small>{{ dataEvento(evento) | date:'MMM' }}</small></span>
+          <span class="event-info"><strong>{{ evento.tema }}</strong><small><i class="fas fa-map-marker-alt mr-1"></i>{{ evento.local }} <em *ngIf="evento.dataEvento">&middot; {{ dataEvento(evento) | date:'HH:mm' }}</em></small></span>
+          <i class="fas fa-chevron-right event-arrow"></i>
+        </button>
+      </section>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+      <section class="dashboard-panel quick-panel">
+        <div class="panel-heading"><div><p class="eyebrow">Atalhos</p><h2>Comece por aqui</h2></div></div>
+        <a class="quick-link" routerLink="/eventos/lista"><i class="fas fa-calendar-check"></i><span><strong>Explorar eventos</strong><small>Veja a programação</small></span><i class="fas fa-chevron-right"></i></a>
+        <a class="quick-link" routerLink="/palestrantes"><i class="fas fa-users"></i><span><strong>Conhecer palestrantes</strong><small>Encontre especialistas</small></span><i class="fas fa-chevron-right"></i></a>
+        <a class="quick-link" routerLink="/user/perfil"><i class="fas fa-user-edit"></i><span><strong>Completar meu perfil</strong><small>Atualize seus dados</small></span><i class="fas fa-chevron-right"></i></a>
+      </section>
+    </div>
+  </div>
+</section>

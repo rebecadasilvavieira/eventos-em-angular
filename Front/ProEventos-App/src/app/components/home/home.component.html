@@ -1,1 +1,30 @@
-<app-titulo [titulo]="'Home'" [iconClass]="'fas fa-home'"></app-titulo>
+<main class="home-page">
+	<section class="home-hero">
+		<div class="home-hero__copy">
+			<p class="home-kicker"><i class="fas fa-circle"></i> Plataforma de eventos</p>
+			<h1>Encontre o próximo evento que vale o seu tempo.</h1>
+			<p class="home-hero__text">Organize eventos, descubra palestrantes e mantenha toda a programação em um só lugar.</p>
+			<div class="home-actions" *ngIf="(accountService.currentUser$ | async) === null">
+				<a class="btn home-button home-button--primary" routerLink="/user/login">Entrar <i class="fas fa-arrow-right ml-2"></i></a>
+				<a class="btn home-button home-button--quiet" routerLink="/user/registration">Criar uma conta</a>
+			</div>
+			<div class="home-actions" *ngIf="(accountService.currentUser$ | async) !== null">
+				<a class="btn home-button home-button--primary" routerLink="/dashboard">Abrir dashboard <i class="fas fa-arrow-right ml-2"></i></a>
+				<a class="btn home-button home-button--quiet" routerLink="/eventos/lista">Ver eventos</a>
+			</div>
+		</div>
+		<div class="home-hero__visual" aria-hidden="true">
+			<div class="visual-calendar"><span>SET</span><strong>09</strong><small>2026</small></div>
+			<div class="visual-line visual-line--one"></div>
+			<div class="visual-line visual-line--two"></div>
+			<div class="visual-dot visual-dot--one"></div>
+			<div class="visual-dot visual-dot--two"></div>
+		</div>
+	</section>
+
+	<section class="home-features" aria-label="Recursos do Conecta Tech Eventos">
+		<article><span><i class="fas fa-calendar-alt"></i></span><div><h2>Eventos organizados</h2><p>Crie programação, lotes, local e contatos em um único cadastro.</p></div></article>
+		<article><span><i class="fas fa-microphone"></i></span><div><h2>Palestrantes em destaque</h2><p>Conheça profissionais, minicurrículos e redes sociais.</p></div></article>
+		<article><span><i class="fas fa-compass"></i></span><div><h2>Uma visão simples</h2><p>Use o dashboard para acompanhar o que importa rapidamente.</p></div></article>
+	</section>
+</main>

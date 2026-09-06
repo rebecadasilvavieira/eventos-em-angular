@@ -1,0 +1,84 @@
+.lista-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.lista-filtro {
+  flex: 1 1 260px;
+  width: auto;
+
+  .form-control, .input-group-text { height: 40px; }
+  .input-group-text { margin-bottom: 0; }
+}
+
+.lista-tabela-container {
+  border: 1px solid #e1e5e8;
+  border-radius: 4px;
+}
+
+.lista-tabela {
+  width: 100%;
+  min-width: 900px;
+  margin-bottom: 0;
+  font-size: 14px;
+
+  th, td {
+    padding: 14px 12px;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: #dee2e6;
+    color: #343a40;
+    border: 0;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    &:hover { background-color: #eef5fb; }
+  }
+
+  .col-imagem { width: 104px; }
+  .col-numero { width: 48px; text-align: center; }
+  .col-tema { min-width: 160px; overflow-wrap: anywhere; }
+  .col-local { min-width: 120px; overflow-wrap: anywhere; }
+  .col-data { width: 160px; white-space: nowrap; }
+  .col-quantidade { width: 170px; text-align: center; }
+  .col-lote { min-width: 90px; overflow-wrap: anywhere; }
+  .col-opcoes { width: 80px; text-align: center; }
+  .lista-vazia { text-align: center; padding: 32px 16px; color: #607078; }
+}
+
+.evento-miniatura {
+  width: 80px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.lista-excluir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 14px;
+}
+
+.lista-paginacao {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 767.98px) {
+  .lista-filtro { flex-basis: 100%; }
+  .lista-tabela { min-width: 480px; }
+}

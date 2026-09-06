@@ -3,3 +3,98 @@
 @import '../node_modules/ngx-bootstrap/datepicker/bs-datepicker.css';
 @import '../node_modules/@fortawesome/fontawesome-free/css/all.min.css';
 @import '../node_modules/bootswatch/dist/cosmo/bootstrap.min.css';
+
+.btn-evento-azul {
+  background-color: #163a52;
+  border-color: #163a52;
+  color: #fff;
+
+  &:not(:disabled):hover,
+  &:not(:disabled):active,
+  &:focus {
+    background-color: #102b3d;
+    border-color: #102b3d;
+    color: #fff;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 .2rem rgba(22, 58, 82, .25);
+  }
+
+  &:disabled {
+    opacity: .65;
+  }
+}
+.btn-outline-evento-azul {
+  background-color: transparent;
+  border-color: #163a52;
+  color: #163a52;
+
+  &:not(:disabled):hover,
+  &:not(:disabled):active {
+    background-color: #163a52;
+    border-color: #163a52;
+    color: #fff;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 .2rem rgba(22, 58, 82, .25);
+  }
+
+  &:disabled {
+    opacity: .65;
+  }
+}
+.btn-evento-tamanho {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  flex-shrink: 0;
+
+  b {
+    font-weight: inherit;
+  }
+}
+
+.modal-body .btn-evento-tamanho {
+  width: 100px;
+}
+
+app-evento-detalhe .card-footer > .d-flex,
+app-evento-lista .card-footer > .d-flex,
+app-redes-sociais .card-footer > .d-flex {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+app-evento-lista .lista-paginacao {
+  .page-link {
+    color: #163a52;
+
+    &:hover {
+      background-color: #eef5fb;
+      color: #102b3d;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 .2rem rgba(22, 58, 82, .25);
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: #163a52;
+    border-color: #163a52;
+    color: #fff;
+  }
+
+  .page-item.disabled .page-link {
+    background-color: #fff;
+    color: #6c757d;
+  }
+}

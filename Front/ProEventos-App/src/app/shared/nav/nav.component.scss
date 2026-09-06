@@ -1,4 +1,14 @@
-i {
-  font-size: 30px;
-  margin-top: 5px;
+.nav-brand-icon {
+  align-items: center;
+  color: #1f4e6d;
+  display: inline-flex;
+  font-size: 1.65rem;
+  height: 34px;
+  justify-content: center;
+  transition: color .15s ease;
+  width: 40px;
+}
+
+.navbar-brand:hover .nav-brand-icon {
+  color: #163a52;
 }

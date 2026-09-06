@@ -1,41 +1,35 @@
-import { Injectable } from '@angular/core';
 import {
-  HttpRequest,
-  HttpHandler,
   HttpEvent,
-  HttpInterceptor
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { User } from '@app/models/identity/User';
-import { AccountService } from '@app/services/account.service';
+import { Injectable } from '@angular/core';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const user = localStorage.getItem('user');
 
-  constructor(private accountService: AccountService) { }
-
-  intercept(
-    request: HttpRequest<unknown>,
-    next: HttpHandler
-  ): Observable<HttpEvent<unknown>> {
-
-    let currentUser: User | null = null;
-
-    this.accountService.currentUser$
-      .pipe(take(1))
-      .subscribe((user: User | null) => {
-        currentUser = user;
-      });
-
-    if (currentUser !== null) {
+    if (user) {
+      const userJson = JSON.parse(user);
       request = request.clone({
         setHeaders: {
-          Authorization: `Bearer ${(currentUser as User).token}`
-        }
+          Authorization: `Bearer ${userJson.token}`,
+        },
       });
     }
 
-    return next.handle(request);
+    return next.handle(request).pipe(
+      catchError((error) => {
+        if (error.status === 401) {
+          localStorage.removeItem('user');
+        }
+
+        return throwError(error);
+      })
+    );
   }
 }

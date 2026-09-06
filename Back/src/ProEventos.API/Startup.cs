@@ -92,8 +92,7 @@ namespace ProEventos.API
             services.AddScoped<ILotePersist, LotePersist>();
             services.AddScoped<IUserPersist, UserPersist>();
             services.AddScoped<IRedeSocialPersist, RedeSocialPersist>();
-            services.AddScoped<IPalestrantePersist, PalestrantePersist>();]
-            services.AddScoped<IUtil, Util>();
+            services.AddScoped<IPalestrantePersist, PalestrantePersist>();
 
             services.AddCors();
             services.AddSwaggerGen(options =>
@@ -144,12 +143,12 @@ namespace ProEventos.API
 
             app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
             app.UseCors(x => x.AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowAnyOrigin());
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseStaticFiles(new StaticFileOptions()
             {

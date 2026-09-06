@@ -1,13 +1,13 @@
- <div class="row mt-4">
+<div class="registration-layout">
 
-	<div class="col-md-6 d-none d-md-block" style="height: 450px;">
-		<div class="text-center col-md-12 my-auto side-heder">
-			<h1>Cadastro de Usuário</h1>
-			<img src="../../../../assets/registerImage.png" class="my-4" alt="" width="400px">
-		</div>
+  <div class="registration-visual">
+    <p class="registration-kicker">Conecta Tech Eventos</p>
+    <h1>Faça parte da comunidade.</h1>
+    <p>Crie sua conta para acompanhar eventos, conhecer palestrantes e participar da programação.</p>
+    <img src="assets/img/registerImage.png" alt="Ilustração de cadastro">
 	</div>
 
-	<div class="col-md-6">
+  <div class="registration-form">
 
     <form [formGroup]="form" class="p-1" (ngSubmit)="register()">
       <div class="pb-2 d-block d-md-none">
@@ -87,7 +87,7 @@
       <div class="form-row">
         <div class="form-group col-12">
         <button
-  class="btn btn-lg btn-success btn-block px-5"
+  class="btn btn-lg btn-register btn-block px-5"
   type="button"
   (click)="register()">
   registrar

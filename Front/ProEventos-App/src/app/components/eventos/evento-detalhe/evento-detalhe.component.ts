@@ -1,5 +1,8 @@
+import { Subject } from 'rxjs';
+import { finalize, takeUntil, timeout } from 'rxjs/operators';
+import { formatarTelefone } from '@app/helpers/telefone';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
 import { AbstractControl,
   FormArray,
   FormBuilder,
@@ -24,7 +27,8 @@ import { environment } from '@environments/environment';
   styleUrls: ['./evento-detalhe.component.scss'],
   providers: [DatePipe],
 })
-export class EventoDetalheComponent implements OnInit {
+export class EventoDetalheComponent implements OnInit, OnDestroy {
+  private readonly destruir$ = new Subject<void>();
   modalRef!: BsModalRef;
   eventoId!: number;
   evento = {} as Evento;
@@ -70,21 +74,38 @@ export class EventoDetalheComponent implements OnInit {
     this.localeService.use('pt-br');
   }
 
+  ngOnInit(): void {
+    this.validation();
+    this.carregarEvento();
+  }
+
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
+    this.spinner.hide();
+  }
+
   public carregarEvento(): void {
     const id = this.activatedRouter.snapshot.paramMap.get('id');
     this.eventoId = id ? Number(id) : 0;
 
     if (this.eventoId !== 0) {
       this.spinner.show();
-
       this.estadoSalvar = 'put';
 
       this.eventoService
         .getEventoById(this.eventoId)
+      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide()))
         .subscribe(
           (evento: Evento) => {
             this.evento = { ...evento };
+
+            if (this.evento.telefone) {
+              this.evento.telefone = formatarTelefone(this.evento.telefone);
+            }
+
             this.form.patchValue(this.evento);
+
             if (this.evento.imagemURL !== '') {
               this.imagemURL = environment.apiURL + 'resources/images/' + this.evento.imagemURL;
             }
@@ -94,31 +115,39 @@ export class EventoDetalheComponent implements OnInit {
             this.toastr.error('Erro ao tentar carregar Evento.', 'Erro!');
             console.error(error);
           }
-        )
-        .add(() => this.spinner.hide());
+        );
     }
   }
 
   public carregarLotes(): void {
     this.loteService
       .getLotesById(this.eventoId)
+      .pipe(timeout(30000), takeUntil(this.destruir$))
       .subscribe(
         (lotesRetorno: Lote[]) => {
-          lotesRetorno.forEach((lote) => {
-            this.lotes.push(this.criarLote(lote));
-          });
+          this.atualizarLotes(lotesRetorno);
         },
         (error: any) => {
           this.toastr.error('Erro ao tentar carregar lotes', 'Erro');
           console.error(error);
         }
-      )
-      .add(() => this.spinner.hide());
+      );
   }
 
-  ngOnInit(): void {
-    this.carregarEvento();
-    this.validation();
+  private atualizarLotes(lotes: Lote[]): void {
+    this.lotes.clear();
+    lotes.forEach(lote => this.lotes.push(this.criarLote(lote)));
+    this.evento.lotes = lotes;
+    this.lotes.markAsPristine();
+  }
+
+  public onTelefoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const valorFormatado = formatarTelefone(input.value);
+
+    input.value = valorFormatado;
+    this.form.get('telefone')?.setValue(valorFormatado, { emitEvent: false });
+    this.evento.telefone = valorFormatado;
   }
 
   public validation(): void {
@@ -157,7 +186,7 @@ export class EventoDetalheComponent implements OnInit {
   }
 
   public mudarValorData(value: Date, indice: number, campo: string): void {
-    this.lotes.value[indice][campo] = value;
+    this.lotes.at(indice).get(campo)?.setValue(value);
   }
 
   public retornaTituloLote(nome: string): string {
@@ -175,30 +204,34 @@ export class EventoDetalheComponent implements OnInit {
   }
 
   public salvarEvento(): void {
-    this.spinner.show();
-    if (this.form.valid) {
-      this.evento =
-        this.estadoSalvar === 'post'
-          ? { ...this.form.value }
-          : { id: this.evento.id, ...this.form.value };
-
-      const salvarEvento$ = this.estadoSalvar === 'post'
-        ? this.eventoService.post(this.evento)
-        : this.eventoService.put(this.evento);
-
-      salvarEvento$.subscribe(
-        (eventoRetorno: Evento) => {
-          this.toastr.success('Evento salvo com Sucesso!', 'Sucesso');
-          this.router.navigate([`eventos/detalhe/${eventoRetorno.id}`]);
-        },
-        (error: any) => {
-          console.error(error);
-          this.spinner.hide();
-          this.toastr.error('Error ao salvar evento', 'Erro');
-        },
-        () => this.spinner.hide()
-      );
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.toastr.warning('Preencha os campos obrigat?rios do evento e dos lotes antes de salvar.');
+      return;
     }
+
+    this.evento = this.estadoSalvar === 'post'
+      ? { ...this.form.value }
+      : { id: this.evento.id, ...this.form.value };
+    const salvarEvento$ = this.estadoSalvar === 'post'
+      ? this.eventoService.post(this.evento)
+      : this.eventoService.put(this.evento);
+
+    this.spinner.show();
+    salvarEvento$.pipe(
+      timeout(30000),
+      takeUntil(this.destruir$),
+      finalize(() => this.spinner.hide())
+    ).subscribe(
+      (eventoRetorno: Evento) => {
+        this.toastr.success('Evento salvo com Sucesso!', 'Sucesso');
+        this.router.navigate(['eventos/detalhe/' + eventoRetorno.id]);
+      },
+      (error: any) => {
+        console.error(error);
+        this.toastr.error('N?o foi poss?vel confirmar o salvamento. Confira o evento antes de tentar novamente.', 'Erro');
+      }
+    );
   }
 
   public salvarLotes(): void {
@@ -206,16 +239,17 @@ export class EventoDetalheComponent implements OnInit {
       this.spinner.show();
       this.loteService
         .saveLote(this.eventoId, this.form.value.lotes)
+      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide()))
         .subscribe(
-          () => {
+          (lotesRetorno: Lote[]) => {
+            this.atualizarLotes(lotesRetorno);
             this.toastr.success('Lotes salvos com Sucesso!', 'Sucesso!');
           },
           (error: any) => {
             this.toastr.error('Erro ao tentar salvar lotes.', 'Erro');
             console.error(error);
           }
-        )
-        .add(() => this.spinner.hide());
+        );
     }
   }
 
@@ -233,6 +267,7 @@ export class EventoDetalheComponent implements OnInit {
 
     this.loteService
       .deleteLote(this.eventoId, this.loteAtual.id)
+      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide()))
       .subscribe(
         () => {
           this.toastr.success('Lote deletado com sucesso', 'Sucesso');
@@ -245,8 +280,7 @@ export class EventoDetalheComponent implements OnInit {
           );
           console.error(error);
         }
-      )
-      .add(() => this.spinner.hide());
+      );
   }
 
   declineDeleteLote(): void {
@@ -272,7 +306,8 @@ export class EventoDetalheComponent implements OnInit {
 
   uploadImagem(): void {
     this.spinner.show();
-    this.eventoService.postUpload(this.eventoId, this.file).subscribe(
+    this.eventoService.postUpload(this.eventoId, this.file)
+      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide())).subscribe(
       () => {
         this.carregarEvento();
         this.toastr.success('Imagem atualizada com Sucesso', 'Sucesso!');
@@ -281,7 +316,6 @@ export class EventoDetalheComponent implements OnInit {
         this.toastr.error('Erro ao fazer upload de imagem', 'Erro!');
         console.log(error);
       }
-    ).add(() => this.spinner.hide());
+    );
   }
-
 }

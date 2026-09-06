@@ -1,2 +1,69 @@
 <app-titulo [titulo]="'Contatos'"[iconClass]="'fas fa-envelope-open-text'"></app-titulo>
 
+<section class="contacts-page" aria-label="Central de ajuda e contatos">
+	<div class="contacts-intro">
+		<div>
+			<p class="eyebrow">Central de ajuda</p>
+			<h1>Encontre o caminho certo</h1>
+			<p>Os dados de contato de cada organização ficam dentro dos detalhes do evento. Use os atalhos abaixo para chegar até eles.</p>
+		</div>
+		<div class="intro-mark"><i class="fas fa-comments"></i></div>
+	</div>
+
+	<div class="row contact-actions">
+		<div class="col-md-4 mb-3">
+			<a class="contact-card" routerLink="/eventos/lista">
+				<i class="fas fa-calendar-alt"></i>
+				<span><strong>Contatos de eventos</strong><small>Veja telefone, e-mail e local de cada evento.</small></span>
+				<i class="fas fa-arrow-right"></i>
+			</a>
+		</div>
+		<div class="col-md-4 mb-3">
+			<a class="contact-card" routerLink="/user/perfil">
+				<i class="fas fa-user-circle"></i>
+				<span><strong>Meu perfil</strong><small>Confira e mantenha seus dados atualizados.</small></span>
+				<i class="fas fa-arrow-right"></i>
+			</a>
+		</div>
+		<div class="col-md-4 mb-3">
+			<a class="contact-card" routerLink="/palestrantes">
+				<i class="fas fa-microphone"></i>
+				<span><strong>Conhecer palestrantes</strong><small>Veja os profissionais e seus minicurrículos.</small></span>
+				<i class="fas fa-arrow-right"></i>
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-lg-7 mb-4">
+			<section class="contact-panel">
+				<p class="eyebrow">Dúvidas frequentes</p>
+				<h2>Como podemos ajudar?</h2>
+				<details open>
+					<summary>Onde encontro o contato de um evento?</summary>
+					<p>Abra a lista de eventos, selecione um evento e consulte a seção de contatos com telefone e e-mail da organização.</p>
+				</details>
+				<details>
+					<summary>Como atualizo meus dados?</summary>
+					<p>Acesse seu perfil pelo menu ou pelo atalho acima. Você pode atualizar seus dados, imagem e função.</p>
+				</details>
+				<details>
+					<summary>Como me torno palestrante?</summary>
+					<p>No perfil, selecione a função Palestrante e salve a alteração. Depois, preencha seu minicurrículo e suas redes sociais.</p>
+				</details>
+			</section>
+		</div>
+		<div class="col-lg-5 mb-4">
+			<section class="contact-panel contact-note">
+				<div class="note-icon"><i class="fas fa-info"></i></div>
+				<div>
+					<p class="eyebrow">Sobre os contatos</p>
+					<h2>Informações por evento</h2>
+					<p>O Conecta Eventos centraliza os dados de cada organização no cadastro do evento. Assim, telefone, e-mail e local permanecem ligados à programação correta.</p>
+					<a routerLink="/eventos/lista" class="btn btn-outline-primary">Ver eventos</a>
+				</div>
+			</section>
+		</div>
+	</div>
+</section>
+
