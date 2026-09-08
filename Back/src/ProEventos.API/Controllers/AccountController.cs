@@ -40,6 +40,7 @@ namespace ProEventos.API.Controllers
             {
                 var userName = User.GetUserName();
                 var user = await _accountService.GetUserByUserNameAsync(userName);
+                if (user == null) return Unauthorized("Usuário não encontrado.");
                 return Ok(user);
             }
             catch (Exception ex)

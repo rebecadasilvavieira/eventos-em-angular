@@ -1,6 +1,5 @@
-import { Subject } from 'rxjs';
-import { finalize, takeUntil, timeout } from 'rxjs/operators';
-import { formatarTelefone } from '@app/helpers/telefone';
+import { of, Subject } from 'rxjs';
+import { finalize, map, switchMap, takeUntil, timeout } from 'rxjs/operators';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
 import { AbstractControl,
@@ -36,7 +35,9 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   estadoSalvar: 'post' | 'put' = 'post';
   loteAtual = { id: 0, nome: '', indice: 0 };
   imagemURL = 'assets/img/upload.png';
-  file!: File;
+  file?: File;
+  salvandoEvento = false;
+  carregandoEvento = false;
 
   get modoEditar(): boolean {
     return this.estadoSalvar === 'put';
@@ -75,6 +76,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.spinner.hide();
     this.validation();
     this.carregarEvento();
   }
@@ -90,19 +92,18 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     this.eventoId = id ? Number(id) : 0;
 
     if (this.eventoId !== 0) {
-      this.spinner.show();
+      this.carregandoEvento = true;
       this.estadoSalvar = 'put';
 
       this.eventoService
         .getEventoById(this.eventoId)
-      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide()))
+      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => {
+        this.carregandoEvento = false;
+        this.spinner.hide();
+      }))
         .subscribe(
           (evento: Evento) => {
             this.evento = { ...evento };
-
-            if (this.evento.telefone) {
-              this.evento.telefone = formatarTelefone(this.evento.telefone);
-            }
 
             this.form.patchValue(this.evento);
 
@@ -141,14 +142,6 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     this.lotes.markAsPristine();
   }
 
-  public onTelefoneInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const valorFormatado = formatarTelefone(input.value);
-
-    input.value = valorFormatado;
-    this.form.get('telefone')?.setValue(valorFormatado, { emitEvent: false });
-    this.evento.telefone = valorFormatado;
-  }
 
   public validation(): void {
     this.form = this.fb.group({
@@ -163,7 +156,6 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
       local: ['', Validators.required],
       dataEvento: ['', Validators.required],
       qtdPessoas: ['', [Validators.required, Validators.max(120000)]],
-      telefone: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       imagemURL: [''],
       lotes: this.fb.array([]),
@@ -195,6 +187,10 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
 
   public resetForm(): void {
     this.form.reset();
+    if (!this.modoEditar) {
+      this.file = undefined;
+      this.imagemURL = 'assets/img/upload.png';
+    }
   }
 
   public cssValidator(campoForm: AbstractControl | null): object {
@@ -204,6 +200,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   }
 
   public salvarEvento(): void {
+    if (this.salvandoEvento) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.toastr.warning('Preencha os campos obrigat?rios do evento e dos lotes antes de salvar.');
@@ -217,18 +214,40 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
       ? this.eventoService.post(this.evento)
       : this.eventoService.put(this.evento);
 
+    let eventoSalvo = false;
+    this.salvandoEvento = true;
     this.spinner.show();
     salvarEvento$.pipe(
       timeout(30000),
+      switchMap((eventoRetorno: Evento) => {
+        eventoSalvo = true;
+        this.evento = eventoRetorno;
+        this.eventoId = eventoRetorno.id;
+        this.estadoSalvar = 'put';
+        return this.file
+          ? this.eventoService.postUpload(eventoRetorno.id, this.file).pipe(
+              timeout(30000), map(eventoComImagem => ({ ...eventoRetorno, ...eventoComImagem })))
+          : of(eventoRetorno);
+      }),
       takeUntil(this.destruir$),
-      finalize(() => this.spinner.hide())
+      finalize(() => {
+        this.salvandoEvento = false;
+        this.spinner.hide();
+      })
     ).subscribe(
       (eventoRetorno: Evento) => {
+        this.evento = eventoRetorno;
+        this.form.patchValue({ imagemURL: eventoRetorno.imagemURL || '' });
+        this.file = undefined;
         this.toastr.success('Evento salvo com Sucesso!', 'Sucesso');
         this.router.navigate(['eventos/detalhe/' + eventoRetorno.id]);
       },
       (error: any) => {
         console.error(error);
+        if (eventoSalvo) {
+          this.toastr.error('O evento foi salvo, mas a imagem não foi enviada. Clique em Salvar Evento para tentar novamente.', 'Imagem pendente');
+          return;
+        }
         this.toastr.error('N?o foi poss?vel confirmar o salvamento. Confira o evento antes de tentar novamente.', 'Erro');
       }
     );
@@ -301,14 +320,16 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     reader.onload = () => this.imagemURL = reader.result as string;
     reader.readAsDataURL(file);
 
-    this.uploadImagem();
+    if (this.modoEditar) this.uploadImagem();
   }
 
   uploadImagem(): void {
+    if (!this.eventoId || !this.file) return;
     this.spinner.show();
     this.eventoService.postUpload(this.eventoId, this.file)
       .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide())).subscribe(
       () => {
+        this.file = undefined;
         this.carregarEvento();
         this.toastr.success('Imagem atualizada com Sucesso', 'Sucesso!');
       },

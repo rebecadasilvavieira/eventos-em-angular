@@ -1,4 +1,6 @@
 import { NgModule } from '@angular/core';
+import { EdicaoEventoGuard } from './guard/edicao-evento.guard';
+import { EventoVisualizacaoComponent } from './components/eventos/evento-visualizacao/evento-visualizacao.component';
 import { Routes, RouterModule } from '@angular/router';
 
 import { DashboardComponent } from './components/dashboard/dashboard.component';
@@ -34,8 +36,9 @@ const routes: Routes = [
         path: 'eventos',
         component: EventosComponent,
         children: [
-          { path: 'detalhe/:id', component: EventoDetalheComponent },
-          { path: 'detalhe', component: EventoDetalheComponent },
+          { path: 'visualizar/:id', component: EventoVisualizacaoComponent },
+          { path: 'detalhe/:id', component: EventoDetalheComponent, canActivate: [EdicaoEventoGuard] },
+          { path: 'detalhe', component: EventoDetalheComponent, canActivate: [EdicaoEventoGuard] },
           { path: 'lista', component: EventoListaComponent },
         ],
       },

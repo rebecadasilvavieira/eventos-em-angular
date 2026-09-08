@@ -1,10 +1,11 @@
+import { AccountService } from '@app/services/account.service';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { Evento } from '@app/models/Evento';
 import { EventoService } from '@app/services/evento.service';
 import { PalestranteService } from '@app/services/palestrante.service';
 import { environment } from '@environments/environment';
-import { forkJoin } from 'rxjs';
+import { EMPTY, forkJoin } from 'rxjs';
+import { expand, reduce, timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,10 +22,11 @@ export class DashboardComponent implements OnInit {
   constructor(
     private eventoService: EventoService,
     private palestranteService: PalestranteService,
-    private router: Router
+    public account: AccountService
   ) { }
 
   ngOnInit(): void {
+    this.account.getUser().subscribe({ error: () => {} });
     this.carregarResumo();
   }
 
@@ -33,14 +35,23 @@ export class DashboardComponent implements OnInit {
     this.erro = false;
 
     forkJoin({
-      eventos: this.eventoService.getEventos(1, 6),
+      eventos: this.eventoService.getEventos(1, 50).pipe(
+        expand(pagina => pagina.pagination && pagina.pagination.currentPage < pagina.pagination.totalPages
+          ? this.eventoService.getEventos(pagina.pagination.currentPage + 1, 50)
+          : EMPTY),
+        reduce((todos, pagina) => ({
+          result: [...todos.result, ...pagina.result],
+          pagination: pagina.pagination
+        })),
+        timeout(30000)
+      ),
       palestrantes: this.palestranteService.getPalestrantes(1, 1),
     }).subscribe(
       ({ eventos, palestrantes }) => {
         this.totalEventos = eventos.pagination?.totalItems || eventos.result.length;
         this.totalPalestrantes = palestrantes.pagination?.totalItems || palestrantes.result.length;
         this.eventos = eventos.result
-          .filter((evento) => !evento.dataEvento || new Date(evento.dataEvento) >= new Date())
+          .filter((evento) => !!evento.dataEvento && this.dataEvento(evento) >= new Date())
           .sort((a, b) => this.dataEvento(a).getTime() - this.dataEvento(b).getTime())
           .slice(0, 3);
       },
@@ -51,7 +62,14 @@ export class DashboardComponent implements OnInit {
   }
 
   public dataEvento(evento: Evento): Date {
-    return evento.dataEvento ? new Date(evento.dataEvento) : new Date(0);
+    if (!evento.dataEvento) return new Date(NaN);
+    const data = String(evento.dataEvento);
+    const brasileira = /^(\d{2})\/(\d{2})\/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/.exec(data);
+    if (brasileira) {
+      const [, dia, mes, ano, hora = '0', minuto = '0', segundo = '0'] = brasileira;
+      return new Date(+ano, +mes - 1, +dia, +hora, +minuto, +segundo);
+    }
+    return new Date(data);
   }
 
   public getImagemURL(imagemURL: string): string {
@@ -60,8 +78,5 @@ export class DashboardComponent implements OnInit {
       : './assets/img/evento.png';
   }
 
-  public abrirEvento(id: number): void {
-    this.router.navigate(['/eventos', 'detalhe', id]);
-  }
 
 }

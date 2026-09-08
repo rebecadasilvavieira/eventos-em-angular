@@ -13,6 +13,8 @@ namespace ProEventos.Application.Dtos
         public string MiniCurriculo { get; set; }
 
         public int UserId { get; set; }
+        public int TotalEventosCriados { get; set; }
+        public int TotalEventosComoPalestrante { get; set; }
 
         public UserUpdateDto User { get; set; }
 

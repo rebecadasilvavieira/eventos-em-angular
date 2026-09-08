@@ -16,7 +16,7 @@
       <div class="form-row">
         <div class="form-group col-sm-6">
           <label>Primeiro Nome</label>
-          <input type="text" class="form-control" formControlName="primeiroNome"
+          <input type="text" class="form-control" formControlName="primeiroNome" (keyup.space)="formatarNome()" (blur)="formatarNome()" autocomplete="given-name"
             [ngClass]="{'is-invalid': f.primeiroNome.errors && f.primeiroNome.touched}" placeholder="Insira o Primeiro nome" />
           <div class="invalid-feedback">
             Primeiro Nome é obrigatório.
@@ -24,7 +24,7 @@
         </div>
         <div class="form-group col-sm-6">
           <label>Último nome</label>
-          <input type="text" class="form-control" formControlName="ultimoNome"
+          <input type="text" class="form-control" formControlName="ultimoNome" (keyup.space)="formatarNome()" (blur)="formatarNome()" autocomplete="family-name"
             [ngClass]="{'is-invalid': f.ultimoNome.errors && f.ultimoNome.touched}" placeholder="Insira o Último nome" />
           <div class="invalid-feedback">
             Último Nome é obrigatório.

@@ -10,6 +10,7 @@ using ProEventos.Persistence.Contextos;
 namespace ProEventos.API.Controllers
 {
     [Authorize]
+    [ProEventos.API.Helpers.EdicaoPalestrante]
     [ApiController]
     [Route("api/eventos/{eventoId:int}/palestrantes")]
     public class EventoPalestrantesController : ControllerBase
@@ -33,6 +34,7 @@ namespace ProEventos.API.Controllers
             if (!await PodeEditar(eventoId)) return NotFound();
 
             var palestrantes = await _context.Palestrantes.AsNoTracking()
+                .Where(p => p.User.Funcao == ProEventos.Domain.Enum.Funcao.Palestrante)
                 .OrderBy(p => p.User.PrimeiroNome).ThenBy(p => p.User.UltimoNome)
                 .Select(p => new {
                     p.Id,
@@ -48,7 +50,8 @@ namespace ProEventos.API.Controllers
         public async Task<IActionResult> Adicionar(int eventoId, int palestranteId)
         {
             if (!await PodeEditar(eventoId)) return NotFound();
-            if (!await _context.Palestrantes.AnyAsync(p => p.Id == palestranteId))
+            if (!await _context.Palestrantes.AnyAsync(p => p.Id == palestranteId &&
+                p.User.Funcao == ProEventos.Domain.Enum.Funcao.Palestrante))
                 return NotFound(new { message = "Palestrante n?o encontrado." });
 
             if (await _context.PalestrantesEventos.AnyAsync(pe => pe.EventoId == eventoId && pe.PalestranteId == palestranteId))

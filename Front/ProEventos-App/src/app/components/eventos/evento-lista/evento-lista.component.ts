@@ -1,3 +1,4 @@
+import { AccountService } from '@app/services/account.service';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Component, OnInit, TemplateRef } from '@angular/core';
@@ -64,10 +65,12 @@ export class EventoListaComponent implements OnInit {
     private modalService: BsModalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    private router: Router
+    private router: Router,
+    public account: AccountService
   ) {}
 
   public ngOnInit(): void {
+    this.account.getUser().subscribe({ error: () => {} });
     this.pagination = {
       currentPage: 1,
       itemsPerPage: 3,

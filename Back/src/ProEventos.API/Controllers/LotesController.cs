@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.Application.Contratos;
@@ -7,6 +7,8 @@ using ProEventos.Application.Dtos;
 
 namespace ProEventos.API.Controllers
 {
+    [ProEventos.API.Helpers.EdicaoPalestrante]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LotesController : ControllerBase

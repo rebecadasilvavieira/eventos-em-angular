@@ -1,6 +1,33 @@
-.palestrantes-selecao { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+:host { display: block; }
+.palestrantes { color: #193e53; }
+.palestrantes-cabecalho { display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid #e7edf1; }
+.palestrantes-icone, .palestrante-avatar { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; background: #edf4f8; color: #24566f; }
+.palestrantes-titulo { flex: 1; min-width: 0; }
+h2 { margin: 0; font-size: 1.2rem; font-weight: 600; line-height: 1.4; }
+.palestrantes-titulo p { margin: 4px 0 0; color: #607481; font-size: .875rem; }
+.palestrantes-contador { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 16px; background: #edf4f8; font-weight: 600; }
+.palestrantes-conteudo { padding: 20px; }
+.palestrantes-selecao { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
 .palestrantes-campo { flex: 1 1 220px; min-width: 0; }
-.palestrantes-campo select { height: 40px; }
-.palestrante-associado { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-top: 1px solid #e1e5e8; }
-.palestrante-associado span { overflow-wrap: anywhere; flex: 1 1 180px; }
-h2 { font-size: 1.5rem; }
+.palestrantes-campo label { font-size: .875rem; font-weight: 600; }
+.palestrantes-campo select { height: 42px; border-radius: 6px; }
+.palestrantes-adicionar { min-height: 42px; border-radius: 6px; }
+.palestrantes-aviso { margin: 0 0 16px; padding: 12px 14px; background: #f4f7f9; border-radius: 8px; color: #526a78; font-size: .875rem; }
+.palestrantes-completo { display: flex; align-items: baseline; gap: 8px; color: #386652; background: #f0f7f3; }
+.palestrantes-vazio { padding: 20px; text-align: center; border: 1px dashed #cbd7df; border-radius: 8px; color: #607481; }
+.palestrantes-lista { display: grid; gap: 10px; margin: 0; }
+.palestrante-associado { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #e1e9ee; border-radius: 8px; }
+.palestrante-avatar { width: 38px; height: 38px; border-radius: 50%; font-size: 1rem; font-weight: 600; }
+.palestrante-info { flex: 1; min-width: 0; }
+.palestrante-nome { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.palestrante-status { display: block; margin-top: 2px; font-size: .75rem; color: #607481; }
+.palestrante-remover { flex-shrink: 0; padding: 8px; border-radius: 6px; color: #915050; font-size: .8125rem; }
+.palestrante-remover:hover:not(:disabled) { background: #fff0f0; color: #852d2d; }
+.btn:focus-visible { outline: 2px solid #24566f; outline-offset: 3px; }
+.palestrantes-rodape { display: flex; align-items: center; gap: 7px; margin: 16px 0 0; color: #607481; font-size: .75rem; }
+@media (max-width: 480px) {
+  .palestrantes-cabecalho, .palestrantes-conteudo { padding: 16px; }
+  .palestrantes-adicionar { width: 100%; }
+  .palestrante-associado { flex-wrap: wrap; }
+  .palestrante-remover { margin-left: auto; }
+}

@@ -13,7 +13,8 @@ import { environment } from '@environments/environment';
 export class PerfilComponent implements OnInit {
   public usuario = {} as UserUpdate;
   public file!: File;
-  public imagemURL = '';
+  public readonly imagemPadrao = 'assets/img/userlogin.png';
+  public imagemURL = this.imagemPadrao;
 
   public get ehPalestrante(): boolean {
     return this.usuario.funcao === 'Palestrante';
@@ -35,7 +36,19 @@ export class PerfilComponent implements OnInit {
     if (this.usuario.imagemURL) {
       this.imagemURL = environment.apiURL + `resources/Images/${this.usuario.imagemURL}`;
     } else {
-      this.imagemURL = './assets/img/perfil.png';
+      this.imagemURL = this.imagemPadrao;
+    }
+  }
+
+  public atualizarPrevia(valor: Pick<UserUpdate, 'primeiroNome' | 'ultimoNome' | 'descricao'>): void {
+    this.usuario = { ...this.usuario, ...valor };
+  }
+
+  public usarImagemPadrao(event: Event): void {
+    const imagem = event.target as HTMLImageElement;
+    if (imagem.getAttribute('src') !== this.imagemPadrao) {
+      this.imagemURL = this.imagemPadrao;
+      imagem.src = this.imagemPadrao;
     }
   }
 

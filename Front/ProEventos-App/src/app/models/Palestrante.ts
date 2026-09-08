@@ -6,6 +6,8 @@ export interface Palestrante {
   id: number;
   miniCurriculo: string;
   user: UserUpdate;
+  totalEventosCriados: number;
+  totalEventosComoPalestrante: number;
 
 
 

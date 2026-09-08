@@ -25,8 +25,6 @@ namespace ProEventos.Application.Dtos
                            ErrorMessage = "Não é uma imagem válida. (gif, jpg, jpeg, bmp ou png)")]
         public string ImagemURL { get; set; }
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [Phone(ErrorMessage = "O campo {0} está com número inválido")]
         public string Telefone { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]

@@ -29,7 +29,21 @@ using ProEventos.Persistence.Contratos;
         public async Task<User> GetUserByUserNameAsync(string username)
         {
             return await _context.Users
-                .SingleOrDefaultAsync(user => user.UserName == username.ToLower());
+                .SingleOrDefaultAsync(user => user.UserName.ToLower() == username.ToLower());
+        }
+        public async Task RemoverVinculosComoPalestranteAsync(int userId)
+        {
+            var vinculos = await _context.PalestrantesEventos
+                .Where(pe => pe.Palestrante.UserId == userId).ToArrayAsync();
+            _context.PalestrantesEventos.RemoveRange(vinculos);
+        }
+        public async Task<(int Criados, int ComoPalestrante)> ContarEventosAsync(int userId)
+        {
+            var criados = await _context.Eventos.CountAsync(e => e.UserId == userId);
+            var participacoes = await _context.PalestrantesEventos.CountAsync(pe =>
+                pe.Palestrante.UserId == userId &&
+                pe.Palestrante.User.Funcao == ProEventos.Domain.Enum.Funcao.Palestrante);
+            return (criados, participacoes);
         }
         }
         }

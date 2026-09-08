@@ -1,3 +1,4 @@
+import { formatarNome } from '@app/helpers/formatarNome';
 import { ValidatorField } from './../../../helpers/ValidatorField';
 import {
   AbstractControlOptions,
@@ -32,6 +33,10 @@ export class RegistrationComponent implements OnInit {
     return this.form.controls;
   }
 
+  public formatarNome(): void {
+    formatarNome(this.form);
+  }
+
   ngOnInit(): void {
     this.validation();
   }
@@ -63,6 +68,7 @@ export class RegistrationComponent implements OnInit {
  register(): void {
   console.log('ENTROU NO REGISTER');
 
+  this.formatarNome();
   this.user = { ...this.form.value };
 
   console.log('DADOS:', this.user);

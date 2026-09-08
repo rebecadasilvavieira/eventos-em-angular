@@ -1,5 +1,8 @@
-<div class="row">
-  <div [ngClass]="{'col-md-8 pr-0': modoEditar, 'col-md-12': !modoEditar}">
+<p *ngIf="carregandoEvento" class="alert alert-info" role="status">
+  <span class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>Carregando evento...
+</p>
+<div class="row" [hidden]="carregandoEvento">
+  <div class="col-md-8">
     <div class="card rounded shadow-sm">
       <form [formGroup]="form">
         <div class="p-3">
@@ -39,7 +42,7 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group col-md-6 col-xl-4">
+            <div class="form-group col-md-6">
               <label>Quantidade de pessoas</label>
               <input type="number" class="form-control" [ngClass]="cssValidator(f.qtdPessoas)" formControlName="qtdPessoas"
               placeholder="Informe a quantidade de pessoas" [(ngModel)]="evento.qtdPessoas">
@@ -51,23 +54,8 @@
               </div>
             </div>
 
-<div class="form-group col-md-6 col-xl-4">
-  <label>Telefone</label>
-  <input
-    type="text"
-    class="form-control"
-    [ngClass]="cssValidator(f.telefone)"
-    formControlName="telefone"
-    placeholder="(00) 00000-0000"
-    maxlength="15"
-    inputmode="numeric"
-    (input)="onTelefoneInput($event)">
 
-  <div *ngIf="f.telefone.errors?.required && f.telefone.touched" class="invalid-feedback">
-    Telefone é obrigatório.
-  </div>
-</div>
-            <div class="form-group col-md-12 col-xl-4">
+            <div class="form-group col-md-6">
               <label>e-mail</label>
               <input type="text" class="form-control" [ngClass]="cssValidator(f.email)"
               formControlName="email" placeholder="Insira o e-mail" [(ngModel)]="evento.email">
@@ -83,10 +71,10 @@
         </div>
         <div class="card-footer">
           <div class="d-flex">
-            <button class="btn btn-outline-secondary mr-auto border btn-evento-tamanho" (click)="resetForm()">
+            <button type="button" class="btn btn-outline-secondary mr-auto border btn-evento-tamanho" [disabled]="salvandoEvento" (click)="resetForm()">
               Cancelar Alteração
             </button>
-            <button class="btn btn-evento-azul btn-evento-tamanho" [disabled]="!form.valid" (click)="salvarEvento()">
+            <button type="button" class="btn btn-evento-azul btn-evento-tamanho" [disabled]="!form.valid || salvandoEvento" (click)="salvarEvento()">
               <!-- <span class="spinner-border spinner-border-sm mr-1"></span> -->
               Salvar Evento
             </button>
@@ -175,17 +163,22 @@
     </div>
   </div>
 </div>
-<div class="col-md-4" *ngIf="modoEditar">
+<div class="col-md-4">
   <div [formGroup]="form" class="card-evento-view shadow-sm">
     <div class="form-row">
       <div class="form-group m-0">
-        <input type="file" #file (change)="onFileChange($event)" class="form-control is-invalid" placeholder="" style="display: none">
+        <input type="file" #file accept="image/png,image/jpeg,image/gif,image/bmp" [disabled]="salvandoEvento" (change)="onFileChange($event)" hidden>
       </div>
     </div>
     <div class="card profile-card-2">
       <div class="card-img-block">
-        <img class="image" [src]="imagemURL" class="img-fluid" (click)="file.click()" alt="Card image cap"
-        tooltip="Uplaod de Nova Imagem" [adaptivePosition]="false" placement="bottom" />
+        <button type="button" class="btn p-0 w-100" [disabled]="salvandoEvento" (click)="file.click()" aria-label="Selecionar imagem do evento">
+          <img [src]="imagemURL" class="img-fluid" alt="Prévia da imagem do evento" />
+        </button>
+      </div>
+      <div class="p-3">
+        <button type="button" class="btn btn-outline-evento-azul w-100" [disabled]="salvandoEvento" (click)="file.click()">Selecionar imagem</button>
+        <small *ngIf="!modoEditar" class="form-text text-muted">A imagem será enviada ao salvar o evento.</small>
       </div>
       <div class="card-body pt-3">
         <h4>{{evento.tema}}</h4>
@@ -197,8 +190,6 @@
         <hr>
         <p class="card-text">
           <b>Contatos</b><br>
-          <small class="text-muted">Telefone: {{evento.telefone}}</small>
-          <br>
           <small class="text-muted">e-mail: {{evento.email}}</small>
         </p>
         <p class="card-text">

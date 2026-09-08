@@ -10,10 +10,12 @@
           <div class="d-flex align-self-center pt-3">
               <img
               [src]="imagemURL"
+              (error)="usarImagemPadrao($event)"
+              alt="Foto do perfil"
               class="rounded-circle"
               (click)="file.click()"
               name="aboutme" width="120" height="120"
-              style="cursor: pointer;">
+              style="cursor: pointer; object-fit: cover;">
           </div>
           <div class="card-body">
             <div class="h4 text-center mb-3">@{{usuario.userName}}</div>
@@ -26,12 +28,12 @@
             <li class="list-group-item">
               <div class="row">
                 <div class="col-6 text-center border-right">
-                  <div class="h5">0</div>
+                  <div class="h5">{{ usuario.totalEventosCriados }}</div>
                   <div class="h6 text-muted">Meus Eventos Criados</div>
                 </div>
-                <div class="col-6 text-center">
-                  <div class="h5">0</div>
-                  <div class="h6 text-muted">Eventos como {{ehPalestrante ? ' Palestrante' : 'Participante'}}</div>
+                <div class="col-6 text-center" *ngIf="ehPalestrante">
+                  <div class="h5">{{ usuario.totalEventosComoPalestrante }}</div>
+                  <div class="h6 text-muted">Eventos como palestrante</div>
                 </div>
               </div>
             </li>
@@ -46,7 +48,7 @@
               <i class="fa fa-address-card mr-2"></i><span>Perfil</span>
             </ng-template>
 
-            <app-perfil-detalhe (changeFormValue)="setFormValue($event)"></app-perfil-detalhe>
+            <app-perfil-detalhe (changeFormValue)="setFormValue($event)" (previewChange)="atualizarPrevia($event)"></app-perfil-detalhe>
           </tab>
           <tab *ngIf="ehPalestrante" class="border border-top-0 p-3">
             <ng-template tabHeading>

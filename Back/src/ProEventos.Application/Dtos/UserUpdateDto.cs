@@ -8,6 +8,8 @@ namespace ProEventos.Application.Dtos
  public class UserUpdateDto
 {
     public int Id { get; set; }
+    public int TotalEventosCriados { get; set; }
+    public int TotalEventosComoPalestrante { get; set; }
 
     public string Titulo { get; set; }
 

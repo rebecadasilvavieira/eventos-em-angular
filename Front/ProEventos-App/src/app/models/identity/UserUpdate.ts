@@ -1,4 +1,6 @@
 export class UserUpdate {
+  totalEventosCriados?: number;
+  totalEventosComoPalestrante?: number;
   titulo!: string;
   userName!: string;
   primeiroNome!: string;

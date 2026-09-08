@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ProEventos.Application.Contratos;
@@ -86,6 +87,15 @@ public async Task<PageList<PalestranteDto>> GetAllPalestrantesAsync(
         if (palestrantes == null) return null;
 
         var resultado = _mapper.Map<PageList<PalestranteDto>>(palestrantes);
+        var eventosCriados = await _palestrantePersist.ContarEventosCriadosAsync(
+            palestrantes.Select(p => p.UserId).Distinct().ToArray());
+        var participacoes = palestrantes.ToDictionary(p => p.Id,
+            p => p.PalestrantesEventos?.Count() ?? 0);
+        foreach (var palestrante in resultado)
+        {
+            palestrante.TotalEventosCriados = eventosCriados.TryGetValue(palestrante.UserId, out var total) ? total : 0;
+            palestrante.TotalEventosComoPalestrante = participacoes[palestrante.Id];
+        }
 
         resultado.CurrentPage = palestrantes.CurrentPage;
         resultado.TotalPages = palestrantes.TotalPages;

@@ -54,7 +54,7 @@ export class EventoPalestrantesComponent implements OnChanges {
         this.selecionado = 0;
         this.toastr.success('Palestrante adicionado ao evento.');
       },
-      () => this.toastr.error('N?o foi poss?vel adicionar o palestrante. Tente novamente.')
+      () => this.toastr.error('Não foi possível adicionar o palestrante. Tente novamente.')
     );
   }
 
@@ -64,9 +64,9 @@ export class EventoPalestrantesComponent implements OnChanges {
     this.http.delete<void>(this.url + '/' + palestrante.id).pipe(finalize(() => this.salvando = false)).subscribe(
       () => {
         palestrante.associado = false;
-        this.toastr.success('V?nculo com o palestrante removido.');
+        this.toastr.success('Vínculo com o palestrante removido.');
       },
-      () => this.toastr.error('N?o foi poss?vel remover o v?nculo. Tente novamente.')
+      () => this.toastr.error('Não foi possível remover o vínculo. Tente novamente.')
     );
   }
 }

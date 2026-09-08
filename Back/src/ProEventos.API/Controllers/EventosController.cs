@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.Application.Contratos;
@@ -15,6 +15,7 @@ using ProEventos.Api.Helpers;
 namespace ProEventos.API.Controllers
 {
     [Authorize]
+    [ProEventos.API.Helpers.EdicaoPalestrante]
     [ApiController]
     [Route("api/[controller]")]
     public class EventosController : ControllerBase

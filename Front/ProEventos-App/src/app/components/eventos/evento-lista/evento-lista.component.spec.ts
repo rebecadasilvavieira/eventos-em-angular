@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { of } from 'rxjs';
 import { EventoService } from '@app/services/evento.service';
+import { AccountService } from '@app/services/account.service';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { EventoListaComponent } from './evento-lista.component';
 
@@ -26,6 +27,7 @@ describe('EventoListaComponent', () => {
       declarations: [EventoListaComponent, DateTimeFormatPipe],
       imports: [FormsModule, RouterTestingModule, NoopAnimationsModule, CollapseModule.forRoot(), PaginationModule.forRoot(), TooltipModule.forRoot(), ModalModule.forRoot()],
       providers: [
+        { provide: AccountService, useValue: { getUser: () => of({ funcao: 'Palestrante' }), podeGerenciarEventos$: of(true) } },
         { provide: EventoService, useValue: { getEventos: () => of(resposta) } },
         { provide: ToastrService, useValue: { error: jasmine.createSpy('error') } },
         { provide: NgxSpinnerService, useValue: { show: () => {}, hide: () => {} } }
@@ -38,6 +40,13 @@ describe('EventoListaComponent', () => {
   it('mostra os eventos retornados na tabela sem abrir o formulario de cadastro', () => {
     expect(fixture.nativeElement.querySelector('tbody').textContent).toContain('Encontro Angular');
     expect(fixture.nativeElement.querySelector('form')).toBeNull();
+  });
+  it('oculta cadastro e exclusao para participantes', () => {
+    TestBed.inject(AccountService).podeGerenciarEventos$ = of(false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('a[routerLink]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.lista-excluir')).toBeNull();
+    expect(fixture.nativeElement.querySelector('tbody').textContent).toContain('Encontro Angular');
   });
 
   it('oferece o cadastro separado no link Novo evento', () => {

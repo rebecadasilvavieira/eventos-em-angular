@@ -1,4 +1,7 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { formatarNome } from '@app/helpers/formatarNome';
+import { formatarTelefone } from '@app/helpers/telefone';
+import { Component, EventEmitter, OnInit, OnDestroy, Output } from '@angular/core';
+import { Subject } from 'rxjs';
 import { AbstractControlOptions, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ValidatorField } from '@app/helpers/ValidatorField';
@@ -7,14 +10,16 @@ import { AccountService } from '@app/services/account.service';
 import { PalestranteService } from '@app/services/palestrante.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-perfil-detalhe',
   templateUrl: './perfil-detalhe.component.html',
   styleUrls: ['./perfil-detalhe.component.scss']
 })
-export class PerfilDetalheComponent implements OnInit {
+export class PerfilDetalheComponent implements OnInit, OnDestroy {
+  private readonly destruir$ = new Subject<void>();
+  @Output() previewChange = new EventEmitter<Pick<UserUpdate, 'primeiroNome' | 'ultimoNome' | 'descricao'>>();
   @Output() changeFormValue = new EventEmitter();
 
   userUpdate = {} as UserUpdate;
@@ -29,9 +34,25 @@ export class PerfilDetalheComponent implements OnInit {
     private spinner: NgxSpinnerService
   ) {}
 
+  public formatarNome(): void {
+    formatarNome(this.form);
+  }
+
   ngOnInit(): void {
     this.validation();
+    this.form.valueChanges.pipe(takeUntil(this.destruir$)).subscribe(valor => {
+      this.previewChange.emit({
+        primeiroNome: valor.primeiroNome || '',
+        ultimoNome: valor.ultimoNome || '',
+        descricao: valor.descricao || ''
+      });
+    });
     this.carregarUsuario();
+  }
+
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   private carregarUsuario(): void {
@@ -41,7 +62,7 @@ export class PerfilDetalheComponent implements OnInit {
       .subscribe(
         (userRetorno: UserUpdate) => {
           console.log(userRetorno);
-          this.userUpdate = userRetorno;
+          this.userUpdate = { ...userRetorno, phoneNumber: formatarTelefone(userRetorno.phoneNumber) };
           this.form.patchValue(this.userUpdate);
           this.changeFormValue.emit({ ...this.userUpdate });
           this.toaster.success('Usuário Carregado', 'Sucesso');
@@ -88,18 +109,22 @@ export class PerfilDetalheComponent implements OnInit {
   }
 
   public atualizarUsuario(): void {
-    this.userUpdate = { ...this.form.value };
+    this.formatarNome();
+    this.f.phoneNumber.setValue(formatarTelefone(this.f.phoneNumber.value));
+    const dadosPerfil = { ...this.form.value };
     this.spinner.show();
 
     const salvarPerfil = this.f.funcao.value === 'Palestrante'
       ? this.palestranteService.post().pipe(
-          switchMap(() => this.accountService.updateUser(this.userUpdate))
+          switchMap(() => this.accountService.updateUser(dadosPerfil))
         )
-      : this.accountService.updateUser(this.userUpdate);
+      : this.accountService.updateUser(dadosPerfil);
 
     salvarPerfil
+      .pipe(switchMap(() => this.accountService.getUser()))
       .subscribe(
-        () => {
+        (usuario: UserUpdate) => {
+          this.userUpdate = usuario;
           this.changeFormValue.emit({ ...this.userUpdate });
           this.toaster.success('Usuário atualizado!', 'Sucesso');
         },
@@ -111,27 +136,16 @@ export class PerfilDetalheComponent implements OnInit {
       .add(() => this.spinner.hide());
   }
 
-  public ativarPalestrante(): void {
-    if (this.f.funcao.value !== 'Palestrante') {
-      return;
-    }
-
-    this.spinner.show();
-    this.palestranteService
-      .post()
-      .subscribe(
-        () => this.changeFormValue.emit({ ...this.form.value }),
-        (error: any) => {
-          this.toaster.error('A função palestrante não pode ser ativada', 'Erro');
-          console.error(error);
-        }
-      )
-      .add(() => this.spinner.hide());
+  public onTelefoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const valorFormatado = formatarTelefone(input.value);
+    input.value = valorFormatado;
+    this.f.phoneNumber.setValue(valorFormatado, { emitEvent: false });
   }
 
   public resetForm(event: any): void {
     event.preventDefault();
-    this.form.reset();
+    this.form.reset({ ...this.userUpdate, password: '', confirmePassword: '' });
   }
 
 }

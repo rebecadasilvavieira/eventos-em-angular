@@ -18,6 +18,7 @@ import { environment } from '@environments/environment';
 export class PalestranteListaComponent implements OnInit {
   public Palestrantes: Palestrante[] = [];
   public eventoId = 0;
+  public readonly imagemPadrao = 'assets/img/userlogin.png';
   public pagination = {} as Pagination;
   termoBuscaChanged: Subject<string> = new Subject<string>();
 
@@ -67,11 +68,18 @@ export class PalestranteListaComponent implements OnInit {
     this.termoBuscaChanged.next(evt.value);
   }
 
-  public getImagemURL(imagemName: string): string {
+  public getImagemURL(imagemName: string | null | undefined): string {
     if (imagemName) {
-      return environment.apiURL + `resources/perfil/${imagemName}`;
+      return environment.apiURL + `resources/Images/${imagemName}`;
     } else {
-      return './assets/img/perfil.png';
+      return this.imagemPadrao;
+    }
+  }
+
+  public usarImagemPadrao(event: Event): void {
+    const imagem = event.target as HTMLImageElement;
+    if (imagem.getAttribute('src') !== this.imagemPadrao) {
+      imagem.src = this.imagemPadrao;
     }
   }
 

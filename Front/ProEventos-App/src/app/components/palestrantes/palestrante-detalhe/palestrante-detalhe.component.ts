@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PalestranteService } from '../../../services/palestrante.service';
 import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { map, debounceTime, take, tap } from 'rxjs/operators';
+import { map, debounceTime, finalize, takeUntil, timeout, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Palestrante } from '@app/models/Palestrante';
 
 @Component({
@@ -11,7 +12,8 @@ import { Palestrante } from '@app/models/Palestrante';
   templateUrl: './palestrante-detalhe.component.html',
   styleUrls: ['./palestrante-detalhe.component.scss'],
 })
-export class PalestranteDetalheComponent implements OnInit {
+export class PalestranteDetalheComponent implements OnInit, OnDestroy {
+  private readonly destruir$ = new Subject<void>();
   public form!: FormGroup;
   public situacaoDoForm = '';
   public corDaDescricao = '';
@@ -29,6 +31,12 @@ export class PalestranteDetalheComponent implements OnInit {
     this.carregarPalestrante();
   }
 
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
+    this.spinner.hide();
+  }
+
   private validation(): void {
     this.form = this.fb.group({
       miniCurriculo: [''],
@@ -40,6 +48,7 @@ export class PalestranteDetalheComponent implements OnInit {
 
     this.palestranteService
       .getPalestrante()
+      .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide()))
       .subscribe(
         (palestrante: Palestrante) => {
           this.form.patchValue(palestrante, { emitEvent: false });
@@ -64,11 +73,13 @@ export class PalestranteDetalheComponent implements OnInit {
           this.corDaDescricao = 'text-warning';
         }),
         debounceTime(1000),
-        tap(() => this.spinner.show())
+        tap(() => this.spinner.show()),
+        takeUntil(this.destruir$)
       )
       .subscribe(() => {
         this.palestranteService
           .put({...this.form.value })
+          .pipe(timeout(30000), takeUntil(this.destruir$), finalize(() => this.spinner.hide()))
           .subscribe(
             () => {
               this.situacaoDoForm = 'Minicurrículo foi ataulizado!';
@@ -82,8 +93,7 @@ export class PalestranteDetalheComponent implements OnInit {
             () => {
               this.toastr.error('Erro ao tentar atualizar Palestrante', 'Erro');
             }
-          )
-          .add(() => this.spinner.hide());
+          );
       });
   }
 }

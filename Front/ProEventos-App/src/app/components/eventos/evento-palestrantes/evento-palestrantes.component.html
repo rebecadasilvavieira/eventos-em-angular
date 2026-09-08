@@ -1,38 +1,53 @@
-<section class="card rounded shadow-sm mt-3" aria-labelledby="titulo-palestrantes-evento">
-  <div class="p-3">
-    <div class="d-flex align-items-center justify-content-between border-bottom mb-2">
+<section class="card rounded shadow-sm mt-3 palestrantes" aria-labelledby="titulo-palestrantes-evento" [attr.aria-busy]="carregando || salvando">
+  <div class="palestrantes-cabecalho">
+    <span class="palestrantes-icone" aria-hidden="true"><i class="fas fa-microphone"></i></span>
+    <div class="palestrantes-titulo">
       <h2 id="titulo-palestrantes-evento">Palestrantes do evento</h2>
-      <i class="fas fa-microphone fa-lg" aria-hidden="true"></i>
+      <p>Adicione quem vai participar da programação.</p>
     </div>
-    <p>Selecione um palestrante cadastrado. Ao adicionar, o v?nculo ? salvo automaticamente.</p>
-    <p *ngIf="carregando" role="status">Carregando palestrantes...</p>
-    <div *ngIf="erroCarregamento" role="alert">
-      <p>N?o foi poss?vel carregar os palestrantes.</p>
-      <button type="button" class="btn btn-outline-evento-azul btn-evento-tamanho" (click)="carregar()">Tentar novamente</button>
+    <span *ngIf="!carregando && !erroCarregamento" class="palestrantes-contador" [attr.aria-label]="associados.length + ' palestrantes associados'">{{ associados.length }}</span>
+  </div>
+  <div class="palestrantes-conteudo">
+    <p *ngIf="carregando" class="palestrantes-aviso" role="status">Carregando palestrantes...</p>
+    <div *ngIf="erroCarregamento" class="palestrantes-aviso" role="alert">
+      <p>Não foi possível carregar os palestrantes.</p>
+      <button type="button" class="btn btn-outline-evento-azul" (click)="carregar()">Tentar novamente</button>
     </div>
     <ng-container *ngIf="!carregando && !erroCarregamento">
       <div *ngIf="disponiveis.length" class="palestrantes-selecao">
         <div class="palestrantes-campo">
-          <label for="palestrante-evento">Palestrante</label>
+          <label for="palestrante-evento">Adicionar palestrante</label>
           <select id="palestrante-evento" class="form-control" [(ngModel)]="selecionado" [disabled]="salvando">
-            <option [ngValue]="0">Selecione o palestrante</option>
-            <option *ngFor="let palestrante of disponiveis" [ngValue]="palestrante.id">{{palestrante.nome}}</option>
+            <option [ngValue]="0">Selecione um palestrante cadastrado</option>
+            <option *ngFor="let palestrante of disponiveis" [ngValue]="palestrante.id">{{ palestrante.nome }}</option>
           </select>
         </div>
-        <button type="button" class="btn btn-outline-evento-azul btn-evento-tamanho" [disabled]="!selecionado || salvando" (click)="adicionar()">
-          <i class="fa fa-plus-circle mr-2" aria-hidden="true"></i>Adicionar
+        <button type="button" class="btn btn-evento-azul palestrantes-adicionar" [disabled]="!selecionado || salvando" (click)="adicionar()">
+          <i class="fa fa-plus mr-2" aria-hidden="true"></i>Adicionar
         </button>
       </div>
-      <p *ngIf="!palestrantes.length" class="text-muted">Nenhum palestrante cadastrado dispon?vel.</p>
-      <p *ngIf="palestrantes.length && !disponiveis.length" class="text-muted">Todos os palestrantes cadastrados j? est?o associados.</p>
-      <p *ngIf="!associados.length" class="text-muted mt-3 mb-0">Este evento ainda n?o tem palestrantes associados.</p>
-      <ul class="list-unstyled mb-0 mt-3" *ngIf="associados.length" aria-label="Palestrantes associados">
+      <p *ngIf="!palestrantes.length" class="palestrantes-aviso">Nenhum palestrante cadastrado. Cadastre um palestrante para adicioná-lo ao evento.</p>
+      <p *ngIf="palestrantes.length && !disponiveis.length" class="palestrantes-aviso palestrantes-completo">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>Todos os palestrantes cadastrados já foram adicionados.
+      </p>
+      <p *ngIf="palestrantes.length && !associados.length" class="palestrantes-vazio">Este evento ainda não tem palestrantes. Selecione um nome acima para começar.</p>
+      <ul class="list-unstyled palestrantes-lista" *ngIf="associados.length" aria-label="Palestrantes associados">
         <li *ngFor="let palestrante of associados" class="palestrante-associado">
-          <span>{{palestrante.nome}}</span>
-          <button type="button" class="btn btn-evento-azul btn-evento-tamanho" [disabled]="salvando"
-            [attr.aria-label]="'Remover v?nculo com ' + palestrante.nome" (click)="remover(palestrante)">Remover v?nculo</button>
+          <span class="palestrante-avatar" aria-hidden="true">{{ palestrante.nome | slice:0:1 | uppercase }}</span>
+          <div class="palestrante-info">
+            <span class="palestrante-nome">{{ palestrante.nome }}</span>
+            <span class="palestrante-status">Vinculado ao evento</span>
+          </div>
+          <button type="button" class="btn palestrante-remover" [disabled]="salvando"
+            [attr.aria-label]="'Remover vínculo com ' + palestrante.nome" (click)="remover(palestrante)">
+            <i class="fas fa-unlink mr-1" aria-hidden="true"></i>Remover
+          </button>
         </li>
       </ul>
+      <p class="palestrantes-rodape" role="status">
+        <i class="fas" [ngClass]="salvando ? 'fa-circle-notch fa-spin' : 'fa-check'" aria-hidden="true"></i>
+        {{ salvando ? 'Salvando alteração...' : 'As alterações são salvas automaticamente.' }}
+      </p>
     </ng-container>
   </div>
 </section>

@@ -1,4 +1,5 @@
 import { EventoPalestrantesComponent } from './components/eventos/evento-palestrantes/evento-palestrantes.component';
+import { EventoVisualizacaoComponent } from './components/eventos/evento-visualizacao/evento-visualizacao.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -52,6 +53,7 @@ defineLocale('pt-br', ptBrLocale);
 
 @NgModule({
   declarations: [
+    EventoVisualizacaoComponent,
     AppComponent,
     EventosComponent,
     PalestrantesComponent,

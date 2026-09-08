@@ -40,7 +40,7 @@ public async Task<SignInResult> CheckUserPasswordAsync(
     {
         var user = await _userManager.Users
             .SingleOrDefaultAsync(
-                user => user.UserName == userUpdateDto.UserName.ToLower()
+                user => user.UserName.ToLower() == userUpdateDto.UserName.ToLower()
             );
 
         return await _signInManager.CheckPasswordSignInAsync(
@@ -61,6 +61,7 @@ public async Task<SignInResult> CheckUserPasswordAsync(
     try
     {
         var user = _mapper.Map<User>(userDto);
+        user.Funcao = ProEventos.Domain.Enum.Funcao.Participante;
         var result = await _userManager.CreateAsync(user, userDto.Password);
 
         if (result.Succeeded)
@@ -86,6 +87,9 @@ public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
         if (user == null) return null;
 
         var userUpdateDto = _mapper.Map<UserUpdateDto>(user);
+        var totais = await _userPersist.ContarEventosAsync(user.Id);
+        userUpdateDto.TotalEventosCriados = totais.Criados;
+        userUpdateDto.TotalEventosComoPalestrante = totais.ComoPalestrante;
         return userUpdateDto;
     }
     catch (System.Exception ex)
@@ -113,6 +117,10 @@ public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
         }
 
                 _userPersist.Update<User>(user);
+                if (user.Funcao != ProEventos.Domain.Enum.Funcao.Palestrante)
+                {
+                    await _userPersist.RemoverVinculosComoPalestranteAsync(user.Id);
+                }
 
                 if (await _userPersist.SaveChangesAsync())
                 {

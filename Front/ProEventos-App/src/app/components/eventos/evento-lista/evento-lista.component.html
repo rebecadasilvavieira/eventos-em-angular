@@ -12,7 +12,7 @@
       <i class="fa mr-2" [ngClass]="exibirImagem ? 'fa-eye-slash' : 'fa-eye'" aria-hidden="true"></i>
       {{exibirImagem ? 'Ocultar imagens' : 'Exibir imagens'}}
     </button>
-    <a class="btn btn-outline-evento-azul btn-evento-tamanho" routerLink="/eventos/detalhe">
+    <a *ngIf="account.podeGerenciarEventos$ | async" class="btn btn-outline-evento-azul btn-evento-tamanho" routerLink="/eventos/detalhe">
       <i class="fa fa-plus-circle mr-2" aria-hidden="true"></i>Novo Evento
     </a>
   </div>
@@ -28,7 +28,7 @@
           <th scope="col" class="col-data">Data e hora</th>
           <th scope="col" class="col-quantidade d-none d-md-table-cell">Quantidade de pessoas</th>
           <th scope="col" class="col-lote d-none d-md-table-cell">Lote</th>
-          <th scope="col" class="col-opcoes">Opções</th>
+          <th *ngIf="account.podeGerenciarEventos$ | async" scope="col" class="col-opcoes">Opções</th>
         </tr>
       </thead>
       <tbody *ngIf="eventos && eventos.length">
@@ -42,7 +42,7 @@
           <td class="col-data">{{evento.dataEvento | DateFormatPipe}}</td>
           <td class="col-quantidade d-none d-md-table-cell">{{evento.qtdPessoas}}</td>
           <td class="col-lote d-none d-md-table-cell">{{((evento.lotes && evento.lotes[0]?.nome) | uppercase) || '—'}}</td>
-          <td class="col-opcoes">
+          <td *ngIf="account.podeGerenciarEventos$ | async" class="col-opcoes">
             <button type="button" class="btn btn-evento-azul lista-excluir" tooltip="Excluir"
               [attr.aria-label]="'Excluir evento ' + evento.tema"
               (click)="openModal($event, template, evento.id, i + 1)">

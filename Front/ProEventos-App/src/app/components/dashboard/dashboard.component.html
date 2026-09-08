@@ -10,29 +10,23 @@
       <h1>O que está acontecendo</h1>
       <p class="text-muted mb-0">Acompanhe eventos e palestrantes em um só lugar.</p>
     </div>
-    <button class="btn btn-primary" routerLink="/eventos/detalhe">
+    <button *ngIf="account.podeGerenciarEventos$ | async" class="btn btn-primary" routerLink="/eventos/detalhe">
       <i class="fas fa-plus mr-2"></i>Novo evento
     </button>
   </div>
 
   <div class="row dashboard-stats" *ngIf="!carregando">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
       <article class="stat-card stat-card--blue">
         <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
         <div><span>Eventos cadastrados</span><strong>{{ totalEventos }}</strong></div>
       </article>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
       <article class="stat-card stat-card--gold">
         <div class="stat-icon"><i class="fas fa-microphone"></i></div>
         <div><span>Palestrantes</span><strong>{{ totalPalestrantes }}</strong></div>
       </article>
-    </div>
-    <div class="col-md-4 mb-3">
-      <a class="stat-card stat-card--green" routerLink="/eventos/lista">
-        <div class="stat-icon"><i class="fas fa-arrow-right"></i></div>
-        <div><span>Acesso rápido</span><strong>Explorar</strong></div>
-      </a>
     </div>
   </div>
 
@@ -56,15 +50,16 @@
         <div class="empty-state" *ngIf="eventos.length === 0">
           <i class="far fa-calendar-times"></i>
           <p>Nenhum próximo evento encontrado.</p>
-          <a routerLink="/eventos/detalhe">Cadastre o primeiro evento</a>
+
         </div>
 
-        <button class="event-row" *ngFor="let evento of eventos" (click)="abrirEvento(evento.id)">
+        <a class="event-row" *ngFor="let evento of eventos"
+          [routerLink]="['/eventos/detalhe', evento.id]"
+          [attr.aria-label]="'Abrir evento ' + evento.tema">
           <img [src]="getImagemURL(evento.imagemURL)" [alt]="evento.tema">
           <span class="event-date"><strong>{{ dataEvento(evento) | date:'dd' }}</strong><small>{{ dataEvento(evento) | date:'MMM' }}</small></span>
           <span class="event-info"><strong>{{ evento.tema }}</strong><small><i class="fas fa-map-marker-alt mr-1"></i>{{ evento.local }} <em *ngIf="evento.dataEvento">&middot; {{ dataEvento(evento) | date:'HH:mm' }}</em></small></span>
-          <i class="fas fa-chevron-right event-arrow"></i>
-        </button>
+        </a>
       </section>
     </div>
 
