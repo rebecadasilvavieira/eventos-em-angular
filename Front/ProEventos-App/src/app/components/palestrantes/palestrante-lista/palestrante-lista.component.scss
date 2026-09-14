@@ -1,3 +1,16 @@
 .palestrante-foto {
   object-fit: cover;
 }
+
+.palestrante-contatos {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+
+  a {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    overflow-wrap: anywhere;
+  }
+}

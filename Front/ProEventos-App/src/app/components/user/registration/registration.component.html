@@ -45,8 +45,11 @@
       <div class="form-group">
         <label for="">Usuario:</label>
         <input class="form-control" type="text" formControlName="userName"
-          [ngClass]="{'is-invalid': f.userName.errors && f.userName.touched}" placeholder="Insira o nome de Usuário" />
-        <div class="invalid-feedback">
+          [ngClass]="{'is-invalid': f.userName.errors && (f.userName.dirty || f.userName.touched)}" placeholder="Insira o nome de Usuário" />
+        <div class="text-danger" role="alert" *ngIf="f.userName.errors?.usuarioExiste">este usuário já existe</div>
+        <div class="text-danger" *ngIf="f.userName.errors?.verificacaoUsuario">Não foi possível verificar o usuário. Digite novamente para tentar.</div>
+        <small *ngIf="f.userName.pending">Verificando usuário...</small>
+        <div class="invalid-feedback" *ngIf="f.userName.errors?.required">
           Usuário é obrigatório.
         </div>
       </div>
@@ -89,6 +92,7 @@
         <button
   class="btn btn-lg btn-register btn-block px-5"
   type="button"
+  [disabled]="form.invalid || form.pending"
   (click)="register()">
   registrar
 </button>

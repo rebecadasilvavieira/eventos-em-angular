@@ -31,7 +31,13 @@ export class AccountService {
 
   getUser(): Observable<UserUpdate> {
     return this.http.get<UserUpdate>(this.baseUrl + 'getUser').pipe(take(1),
-      tap(user => this.gerenciarSource.next(user.funcao === 'Palestrante')));
+      tap(user => this.gerenciarSource.next(!!user)));
+  }
+
+  userNameExists(userName: string, editing = false): Observable<{ exists: boolean }> {
+    return this.http.get<{ exists: boolean }>(this.baseUrl + 'username-exists', {
+      params: { userName: userName.trim(), editing: String(editing) }
+    }).pipe(take(1));
   }
 
   updateUser(model: UserUpdate): Observable<void> {
@@ -62,6 +68,7 @@ export class AccountService {
   }
 
   public setCurrentUser(user: User): void {
+    this.gerenciarSource.next(!!user);
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
   }

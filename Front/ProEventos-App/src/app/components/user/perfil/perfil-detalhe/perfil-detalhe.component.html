@@ -1,8 +1,18 @@
-<form [formGroup]="form" (submit)="onSubmit()">
+<form [formGroup]="form" (submit)="onSubmit()" autocomplete="off">
+  <div class="form-group">
+    <h3 class="border-bottom">Detalhe Perfil</h3>
+  </div>
+  <div class="form-group">
+    <label for="perfil-usuario">Usuário</label>
+    <input id="perfil-usuario" name="perfil-usuario" type="text" class="form-control" formControlName="userName" autocomplete="off"
+      autocapitalize="none" spellcheck="false"
+      [class.is-invalid]="f.userName.invalid && (f.userName.dirty || f.userName.touched)">
+    <div class="text-danger" role="alert" *ngIf="f.userName.errors?.usuarioExiste">este usuário já existe</div>
+    <div class="text-danger" *ngIf="f.userName.errors?.required && f.userName.touched">Usuário é obrigatório.</div>
+    <div class="text-danger" *ngIf="f.userName.errors?.verificacaoUsuario">Não foi possível verificar o usuário. Digite novamente para tentar.</div>
+    <small *ngIf="f.userName.pending">Verificando usuário...</small>
+  </div>
   <div class="form-row">
-    <div class="form-group col-12">
-      <h3 class="border-bottom">Detalhe Perfil</h3>
-    </div>
     <div class="form-group col">
       <label>Título</label>
       <select formControlName="titulo" class="form-control"
@@ -39,7 +49,7 @@
 <div class="form-row">
   <div class="form-group col-sm-5">
     <label>E-mail</label>
-    <input type="text" formControlName="email" class="form-control"
+    <input type="email" name="perfil-email" autocomplete="email" formControlName="email" class="form-control"
     [ngClass]="{ 'is-invalid': f.email.errors && f.email.touched }" />
     <div *ngIf="f.email.errors && f.email.touched" class="invalid-feedback">
       <div *ngIf="f.email.errors.required">e-mail é obrigatório</div>
@@ -86,7 +96,7 @@
 <div class="form-row">
   <div class="form-group col-sm">
     <label>Senha</label>
-    <input type="password" formControlName="password" class="form-control"
+    <input type="password" autocomplete="new-password" formControlName="password" class="form-control"
     [ngClass]="{ 'is-invalid': f.password.errors && f.password.touched }" />
     <div *ngIf="f.password.errors && f.password.touched" class="invalid-feedback">
       <div *ngIf="f.password.errors.required">Senha é obrigatório</div>
@@ -95,7 +105,7 @@
   </div>
   <div class="form-group col-sm">
     <label>Confirmar Senha</label>
-    <input type="password" formControlName="confirmePassword" class="form-control"
+    <input type="password" autocomplete="new-password" formControlName="confirmePassword" class="form-control"
     [ngClass]="{ 'is-invalid': f.confirmePassword.errors && f.confirmePassword.touched }" />
     <div *ngIf="f.confirmePassword.errors && f.confirmePassword.touched" class="invalid-feedback">
       <div *ngIf="f.confirmePassword.errors.required">Confirmação de senha é Obrigatório</div>
@@ -109,7 +119,7 @@
     <button (click)="resetForm($event)" class="btn btn-outline-secondary mr-auto border">
       Cancelar Alteração
     </button>
-    <button class="btn btn-success" type="submit">
+    <button class="btn btn-success" type="submit" [disabled]="f.userName.invalid || f.userName.pending">
       Salvar Alteração
     </button>
   </div>

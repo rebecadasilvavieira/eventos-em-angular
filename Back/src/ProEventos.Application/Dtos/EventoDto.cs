@@ -6,6 +6,7 @@ namespace ProEventos.Application.Dtos
     public class EventoDto
     {
         public int Id { get; set; }
+        public bool PodeEditar { get; set; }
         public string Local { get; set; }
         public string DataEvento { get; set; }
 

@@ -4,8 +4,8 @@ import { Evento } from '@app/models/Evento';
 import { EventoService } from '@app/services/evento.service';
 import { PalestranteService } from '@app/services/palestrante.service';
 import { environment } from '@environments/environment';
-import { EMPTY, forkJoin } from 'rxjs';
-import { expand, reduce, timeout } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,25 +35,13 @@ export class DashboardComponent implements OnInit {
     this.erro = false;
 
     forkJoin({
-      eventos: this.eventoService.getEventos(1, 50).pipe(
-        expand(pagina => pagina.pagination && pagina.pagination.currentPage < pagina.pagination.totalPages
-          ? this.eventoService.getEventos(pagina.pagination.currentPage + 1, 50)
-          : EMPTY),
-        reduce((todos, pagina) => ({
-          result: [...todos.result, ...pagina.result],
-          pagination: pagina.pagination
-        })),
-        timeout(30000)
-      ),
+      eventos: this.eventoService.getEventos(1, 5).pipe(timeout(30000)),
       palestrantes: this.palestranteService.getPalestrantes(1, 1),
     }).subscribe(
       ({ eventos, palestrantes }) => {
         this.totalEventos = eventos.pagination?.totalItems || eventos.result.length;
         this.totalPalestrantes = palestrantes.pagination?.totalItems || palestrantes.result.length;
-        this.eventos = eventos.result
-          .filter((evento) => !!evento.dataEvento && this.dataEvento(evento) >= new Date())
-          .sort((a, b) => this.dataEvento(a).getTime() - this.dataEvento(b).getTime())
-          .slice(0, 3);
+        this.eventos = eventos.result.slice(0, 5);
       },
       () => {
         this.erro = true;

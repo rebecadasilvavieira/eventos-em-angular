@@ -19,7 +19,6 @@ namespace ProEventos.Persistence
 
         public async Task<PageList<Evento>> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false)
         {
-            var participante = await _context.Users.AnyAsync(u => u.Id == userId && u.Funcao != Domain.Enum.Funcao.Palestrante);
             IQueryable<Evento> query = _context.Eventos
                 .Include(e => e.Lotes)
                 .Include(e => e.RedesSociais);
@@ -33,7 +32,7 @@ namespace ProEventos.Persistence
 
            query = query.AsNoTracking()
              .Where(e => e.Tema.ToLower().Contains(pageParams.Term.ToLower()) &&
-                         (participante && e.UserId > 0 || e.UserId == userId))
+                         e.UserId > 0)
              .OrderBy(e => e.Id);
 
             return await PageList<Evento>.CreateAsync(
@@ -66,7 +65,6 @@ namespace ProEventos.Persistence
 
         public async Task<Evento> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes = false)
         {
-            var participante = await _context.Users.AnyAsync(u => u.Id == userId && u.Funcao != Domain.Enum.Funcao.Palestrante);
             IQueryable<Evento> query = _context.Eventos
                 .Include(e => e.Lotes)
                 .Include(e => e.RedesSociais);
@@ -79,7 +77,7 @@ namespace ProEventos.Persistence
             }
 
             query = query.AsNoTracking().OrderBy(e => e.Id)
-                         .Where(e => e.Id == eventoId && (participante && e.UserId > 0 || e.UserId == userId));
+                         .Where(e => e.Id == eventoId && e.UserId > 0);
 
             return await query.FirstOrDefaultAsync();
         }

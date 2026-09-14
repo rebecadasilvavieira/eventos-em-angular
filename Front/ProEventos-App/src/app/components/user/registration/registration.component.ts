@@ -1,4 +1,5 @@
 import { formatarNome } from '@app/helpers/formatarNome';
+import { usuarioUnico } from '@app/helpers/usuario-unico';
 import { ValidatorField } from './../../../helpers/ValidatorField';
 import {
   AbstractControlOptions,
@@ -56,7 +57,7 @@ export class RegistrationComponent implements OnInit {
         Validators.required,
         Validators.email
       ]],
-      userName: ['', Validators.required],
+      userName: ['', Validators.required, usuarioUnico(this.accountService)],
       password: ['', [
         Validators.required,
         Validators.minLength(6)
@@ -66,12 +67,12 @@ export class RegistrationComponent implements OnInit {
   }
 
  register(): void {
-  console.log('ENTROU NO REGISTER');
+  this.form.markAllAsTouched();
+  if (this.form.invalid || this.form.pending) return;
 
   this.formatarNome();
   this.user = { ...this.form.value };
 
-  console.log('DADOS:', this.user);
 
   this.accountService.register(this.user).subscribe(
     () => {
@@ -79,6 +80,7 @@ export class RegistrationComponent implements OnInit {
       this.router.navigateByUrl('/dashboard');
     },
     (error: any) => {
+      if (error.status === 409) this.f.userName.setErrors({ usuarioExiste: true });
       console.error('ERRO COMPLETO:', error);
       console.error('ERRO DA API:', error.error);
       this.toaster.error(error.error);

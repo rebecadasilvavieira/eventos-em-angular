@@ -44,10 +44,30 @@ describe('PerfilDetalheComponent', () => {
     fixture = TestBed.createComponent(PerfilDetalheComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    component.f.userName.clearAsyncValidators();
+    component.f.userName.setValue('usuario-teste');
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  it('carrega o nome cadastrado no campo usuario e o email no campo separado', () => {
+    (TestBed.inject(AccountService).getUser as jasmine.Spy).and.returnValue(of({
+      userName: 'Fernanda', email: 'fernanda@example.com'
+    }));
+    (component as any).carregarUsuario();
+    fixture.detectChanges();
+    const usuario: HTMLInputElement = fixture.nativeElement.querySelector('#perfil-usuario');
+    const email: HTMLInputElement = fixture.nativeElement.querySelector('[formControlName="email"]');
+    expect(usuario.value).toBe('Fernanda');
+    expect(email.value).toBe('fernanda@example.com');
+    expect(usuario.autocomplete).toBe('off');
+  });
+  it('nao envia a foto antiga ao salvar os dados do perfil', () => {
+    component.form.patchValue({ userName: 'novo', imagemURL: 'antiga.png', funcao: 'Participante' });
+    component.atualizarUsuario();
+    const dados = (TestBed.inject(AccountService).updateUser as jasmine.Spy).calls.mostRecent().args[0];
+    expect(dados.imagemURL).toBeUndefined();
   });
   it('atualiza a previa ao digitar sem publicar alteracoes de funcao ou senha', () => {
     spyOn(component.previewChange, 'emit');

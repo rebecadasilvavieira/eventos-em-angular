@@ -28,10 +28,23 @@
               width="120" height="120">
           </div>
           <div class="card-body">
-            <div class="h4 text-center mb-3">@{{palestrante.user.userName}}</div>
+            <div class="h4 text-center mb-3">@{{palestrante.user.userName | titlecase}}</div>
             <div class="h7 text-bold pb-1"><b>Nome:</b> {{palestrante.user.primeiroNome + ' ' + palestrante.user.ultimoNome}}</div>
             <div class="h7">
               {{palestrante.user.descricao || palestrante.miniCurriculo}}
+            </div>
+            <div class="palestrante-contatos mt-3" *ngIf="palestrante.user.email || palestrante.redesSociais?.length">
+              <a *ngIf="palestrante.user.email" [href]="'mailto:' + palestrante.user.email" class="palestrante-email">
+                <i class="fas fa-envelope" aria-hidden="true"></i>
+                <span>{{ palestrante.user.email }}</span>
+              </a>
+              <ng-container *ngFor="let rede of palestrante.redesSociais">
+                <a *ngIf="urlRedeSocial(rede.url) as url" [href]="url" target="_blank" rel="noopener noreferrer"
+                  class="palestrante-rede" [attr.aria-label]="nomeRedeSocial(rede.nome) + ' de ' + palestrante.user.primeiroNome">
+                  <i class="fas fa-link" aria-hidden="true"></i>
+                  <span>{{ nomeRedeSocial(rede.nome) }}</span>
+                </a>
+              </ng-container>
             </div>
           </div>
           <ul class="list-group list-group-flush">

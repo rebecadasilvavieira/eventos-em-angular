@@ -87,10 +87,10 @@ resultado = (OkObjectResult)await controller.Get(7);
 Check(JsonSerializer.Serialize(resultado.Value) == "[]", "participante sai da selecao de palestrantes do evento");
 Check(await controller.Adicionar(7, 3) is NotFoundObjectResult, "API impede vincular participante como palestrante");
 var provider = new ContextServiceProvider(context);
-async Task<bool> PodeExecutar(string method, int? eventoId = null)
+async Task<bool> PodeExecutar(string method, int? eventoId = null, int userId = 1)
 {
     var httpContext = new DefaultHttpContext { RequestServices = provider,
-        User = controller.User };
+        User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) }, "test")) };
     httpContext.Request.Method = method;
     var routeData = new RouteData();
     if (eventoId.HasValue) routeData.Values["eventoId"] = eventoId.Value;
@@ -104,9 +104,13 @@ async Task<bool> PodeExecutar(string method, int? eventoId = null)
     });
     return executou;
 }
-Check(!await PodeExecutar("POST"), "participante nao pode criar evento");
-Check(!await PodeExecutar("PUT", 7) && !await PodeExecutar("DELETE", 7),
-    "mudanca de funcao bloqueia escrita com a mesma identidade autenticada");
+Check(await PodeExecutar("POST"), "participante pode criar evento");
+Check(await PodeExecutar("POST", userId: 2), "conta sem funcao pode criar evento");
+Check(!await PodeExecutar("POST", userId: 999), "conta inexistente nao pode criar evento");
+Check(await PodeExecutar("PUT", 7) && await PodeExecutar("DELETE", 7),
+    "participante pode gerenciar seu proprio evento");
+Check(!await PodeExecutar("PUT", 9) && !await PodeExecutar("DELETE", 9),
+    "participante nao pode gerenciar evento de outro usuario");
 Check(await PodeExecutar("GET", 7), "participante mantem acesso de leitura");
 var eventosPersist = new EventoPersist(context);
 Check(await eventosPersist.GetEventoByIdAsync(1, 9) != null,
@@ -119,6 +123,15 @@ Check(cards.Count == 1 && cards.Single().TotalEventosComoPalestrante == 0,
 Check(await PodeExecutar("PUT", 7) && !await PodeExecutar("PUT", 9),
     "palestrante pode editar apenas eventos proprios");
 var eventosContaSemFuncao = await eventosPersist.GetAllEventosAsync(2, new PageParams());
+var eventosService = new EventoService(new GeralPersist(context), eventosPersist, mapper);
+var compartilhados = await eventosService.GetAllEventosAsync(1, new PageParams());
+Check(compartilhados.TotalCount == 2, "palestrante enxerga eventos de outros usuarios no dashboard");
+Check(compartilhados.Single(e => e.Id == 7).PodeEditar && !compartilhados.Single(e => e.Id == 9).PodeEditar,
+    "lista identifica quais eventos pertencem ao usuario");
+Check((await eventosService.GetEventoByIdAsync(1, 9)).PodeEditar == false,
+    "palestrante consulta evento de outro usuario sem permissao de edicao");
+Check(await eventosService.UpdateEvento(1, 9, new EventoDto()) == null && !await eventosService.DeleteEvento(1, 9),
+    "servico impede alterar e excluir evento de outro usuario");
 Check(eventosContaSemFuncao.Count == 2, "conta antiga sem funcao enxerga eventos de outros usuarios");
 Check(await eventosPersist.GetEventoByIdAsync(2, 7) != null, "conta sem funcao pode consultar os detalhes");
 context.Users.Add(new User { Id = 4, UserName = "Lucas.Almeida", NormalizedUserName = "LUCAS.ALMEIDA" });
@@ -148,7 +161,49 @@ using (var legado = new SqliteConnection("Data Source=:memory:"))
     Check(await persistLegado.GetEventoByIdAsync(4, 1, true) == null,
         "consulta direta a evento sem organizador nao gera erro de banco");
 }
-Console.WriteLine("31 verificacoes passaram; banco SQLite apenas em memoria.");
+Console.WriteLine("Verificacoes passaram; banco SQLite apenas em memoria.");
+var usuarioFoto = await account.GetUserByUserNameAsync("dono");
+usuarioFoto.ImagemURL = "foto-nova.png";
+await account.UpdateAccount(usuarioFoto);
+var perfilAntigo = await account.GetUserByUserNameAsync("dono");
+perfilAntigo.ImagemURL = "";
+perfilAntigo.Descricao = "Perfil atualizado depois do upload";
+var accountController = new AccountController(account, new TokenTeste(), null) {
+    ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext {
+        User = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(ClaimTypes.Name, "dono")
+        }, "test"))
+    }}
+};
+Check(await accountController.UpdateUser(perfilAntigo) is OkObjectResult, "salva perfil depois do upload");
+using (var consultaFoto = new ProEventosContext(options)) {
+    var salvo = await consultaFoto.Users.AsNoTracking().SingleAsync(u => u.Id == 1);
+    Check(salvo.ImagemURL == "foto-nova.png" && salvo.Descricao == perfilAntigo.Descricao,
+        "salvar formulario antigo preserva foto nova no banco");
+}
+
+var nomeOcupado = await account.GetUserByIdAsync(1);
+nomeOcupado.UserName = "OUTRO";
+Check(await accountController.UpdateUser(nomeOcupado) is ConflictObjectResult,
+    "edicao rejeita nome de outra pessoa mesmo em maiusculas");
+Check(await accountController.Register(new UserDto { UserName = "OUTRO" }) is ConflictObjectResult,
+    "cadastro rejeita nome repetido");
+var nomeNovo = await account.GetUserByIdAsync(1);
+nomeNovo.UserName = "Ana.Nova";
+Check(await accountController.UpdateUser(nomeNovo) is OkObjectResult, "permite trocar para nome livre");
+Check((await account.GetUserByUserNameAsync("ana.nova")).Id == 1,
+    "novo login mantem identidade da conta");
+Check(await accountController.GetUser() is OkObjectResult,
+    "token com nome anterior continua identificando a mesma conta pelo id");
+Check((await account.GetUserByIdAsync(1)).ImagemURL == "foto-nova.png",
+    "troca de nome preserva foto");
+Check(await accountController.UpdateUser(await account.GetUserByIdAsync(1)) is OkObjectResult,
+    "permite salvar mantendo o proprio nome");
+
+sealed class TokenTeste : ProEventos.Application.Contratos.ITokenService
+{
+    public Task<string> CreateToken(UserUpdateDto user) => Task.FromResult("token-teste");
+}
 
 sealed class ContextServiceProvider : IServiceProvider
 {

@@ -3,6 +3,7 @@ import { Lote } from "./Lote";
 import { Palestrante } from './Palestrante';
 
 export interface Evento {
+  podeEditar?: boolean;
   id: number;
   local: string;
   dataEvento?: Date;

@@ -101,4 +101,26 @@ export class PalestranteListaComponent implements OnInit {
       .add(() => this.spinner.hide());
   }
 
+  public urlRedeSocial(valor: string): string | null {
+    const texto = (valor || '').trim();
+    if (!texto) return null;
+    try {
+      const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(texto) ? texto : `https://${texto}`);
+      return ['https:', 'http:'].includes(url.protocol) ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  public nomeRedeSocial(nome: string): string {
+    const nomes: { [classe: string]: string } = {
+      'fab fa-youtube': 'YouTube', 'fab fa-instagram': 'Instagram',
+      'fab fa-facebook': 'Facebook', 'fab fa-twitter': 'Twitter',
+      'fab fa-google': 'Google', 'fab fa-linkedin': 'LinkedIn',
+      'fab fa-pinterest': 'Pinterest', 'fab fa-whatsapp': 'WhatsApp',
+      'fab fa-telegram': 'Telegram', 'fab fa-skype': 'Skype', 'fab fa-vimeo': 'Vimeo'
+    };
+    return nomes[nome] || nome || 'Rede social';
+  }
+
 }

@@ -20,6 +20,7 @@ namespace ProEventos.Application.Contratos
 
         Task<UserUpdateDto> CreateAccountAsync(UserDto userDto);
 
-        Task<UserUpdateDto> UpdateAccount(UserUpdateDto userUpdateDto);
+        Task<UserUpdateDto> UpdateAccount(UserUpdateDto userUpdateDto, int? authenticatedUserId = null);
+        Task<UserUpdateDto> GetUserByIdAsync(int userId);
     }
 }

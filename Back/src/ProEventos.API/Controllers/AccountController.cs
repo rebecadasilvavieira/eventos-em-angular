@@ -38,16 +38,27 @@ namespace ProEventos.API.Controllers
         {
             try
             {
-                var userName = User.GetUserName();
-                var user = await _accountService.GetUserByUserNameAsync(userName);
+                var user = await _accountService.GetUserByIdAsync(User.GetUserId());
                 if (user == null) return Unauthorized("Usuário não encontrado.");
                 return Ok(user);
             }
+            catch (ArgumentException ex) when (ex.Message == "este usuário já existe") { return Conflict(ex.Message); }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
                     $"Erro ao tentar recuperar Usuário. Erro: {ex.Message}");
             }
+        }
+
+
+        [HttpGet("username-exists")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UserNameExists([FromQuery] string userName, [FromQuery] bool editing = false)
+        {
+            var existente = string.IsNullOrWhiteSpace(userName) ? null :
+                await _accountService.GetUserByUserNameAsync(userName.Trim());
+            var proprio = editing && User.Identity.IsAuthenticated && existente?.Id == User.GetUserId();
+            return Ok(new { exists = existente != null && !proprio });
         }
 
         [HttpPost("Register")]
@@ -56,8 +67,9 @@ namespace ProEventos.API.Controllers
         {
             try
             {
+                userDto.UserName = userDto.UserName?.Trim();
                 if (await _accountService.UserExists(userDto.UserName))
-                    return BadRequest("Usuário já existe");
+                    return Conflict("este usuário já existe");
 
                 var user = await _accountService.CreateAccountAsync(userDto);
                 if (user != null)
@@ -70,6 +82,7 @@ namespace ProEventos.API.Controllers
 
                 return BadRequest("Usuário não criado, tente novamente mais tarde!");
             }
+            catch (ArgumentException ex) when (ex.Message == "este usuário já existe") { return Conflict(ex.Message); }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
@@ -96,6 +109,7 @@ namespace ProEventos.API.Controllers
                     token = _tokenService.CreateToken(user).Result
                 });
             }
+            catch (ArgumentException ex) when (ex.Message == "este usuário já existe") { return Conflict(ex.Message); }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
@@ -108,13 +122,13 @@ namespace ProEventos.API.Controllers
         {
             try
             {
-                if (userUpdateDto.UserName != User.GetUserName())
-                    return Unauthorized("Usuário Inválido");
-
-                var user = await _accountService.GetUserByUserNameAsync(User.GetUserName());
+                if (string.IsNullOrWhiteSpace(userUpdateDto.UserName)) return BadRequest("Usuário é obrigatório.");
+                var user = await _accountService.GetUserByIdAsync(User.GetUserId());
                 if (user == null) return Unauthorized("Usuário Inválido");
 
-                var userReturn = await _accountService.UpdateAccount(userUpdateDto);
+                // A foto e atualizada exclusivamente pelo endpoint de upload.
+                userUpdateDto.ImagemURL = user.ImagemURL;
+                var userReturn = await _accountService.UpdateAccount(userUpdateDto, User.GetUserId());
                 if (userReturn == null) return NoContent();
 
                 return Ok(new
@@ -124,6 +138,7 @@ namespace ProEventos.API.Controllers
                     token = _tokenService.CreateToken(userReturn).Result
                 });
             }
+            catch (ArgumentException ex) when (ex.Message == "este usuário já existe") { return Conflict(ex.Message); }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
@@ -136,7 +151,7 @@ namespace ProEventos.API.Controllers
         {
             try
             {
-                var user = await _accountService.GetUserByUserNameAsync(User.GetUserName());
+                var user = await _accountService.GetUserByIdAsync(User.GetUserId());
                 if (user == null) return NoContent();
 
                 var file = Request.Form.Files[0];
@@ -149,6 +164,7 @@ namespace ProEventos.API.Controllers
 
                 return Ok(userRetorno);
             }
+            catch (ArgumentException ex) when (ex.Message == "este usuário já existe") { return Conflict(ex.Message); }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,

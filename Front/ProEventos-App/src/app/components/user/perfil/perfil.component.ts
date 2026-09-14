@@ -56,12 +56,14 @@ export class PerfilComponent implements OnInit {
     const reader = new FileReader();
     const fileList: FileList = ev.target.files as FileList;
 
-    reader.onload = (event: any) => this.imagemURL = event.target.result;
+    reader.onload = (event: any) => {
+      this.imagemURL = event.target.result;
+      this.uploadImagem();
+    };
 
     if (fileList && fileList.length > 0) {
       this.file = fileList[0];
       reader.readAsDataURL(this.file);
-      this.uploadImagem();
     }
   }
 
@@ -70,8 +72,12 @@ export class PerfilComponent implements OnInit {
     this.accountService
       .postUpload(this.file)
       .subscribe(
-        () => this.toastr.success('Imagem atualizada com Sucesso', 'Sucesso!'),
+        (usuario: UserUpdate) => {
+          this.setFormValue({ ...this.usuario, imagemURL: usuario.imagemURL });
+          this.toastr.success('Imagem atualizada com Sucesso', 'Sucesso!');
+        },
         (error: any) => {
+          this.setFormValue(this.usuario);
           this.toastr.error('Erro ao fazer upload de imagem', 'Erro!');
           console.error(error);
         }

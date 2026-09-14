@@ -23,6 +23,18 @@ describe('AccountService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+  it('libera criar eventos para uma conta nova e remove a permissao ao sair', () => {
+    let permitido = false;
+    service.podeGerenciarEventos$.subscribe(value => permitido = value);
+    service.register({ userName: 'novo' }).subscribe();
+    http.expectOne(service.baseUrl + 'register').flush({ userName: 'novo', token: 'token-teste' });
+    expect(permitido).toBeTrue();
+    service.getUser().subscribe();
+    http.expectOne(service.baseUrl + 'getUser').flush({ userName: 'novo', funcao: 'Participante' });
+    expect(permitido).toBeTrue();
+    service.logout();
+    expect(permitido).toBeFalse();
+  });
   it('atualiza o menu quando cadastra uma conta depois de sair de outra', () => {
     const estados: Array<string | null> = [];
     service.currentUser$.subscribe(user => estados.push(user?.userName || null));

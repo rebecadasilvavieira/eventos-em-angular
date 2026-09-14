@@ -1,4 +1,5 @@
 import { formatarNome } from '@app/helpers/formatarNome';
+import { usuarioUnico } from '@app/helpers/usuario-unico';
 import { formatarTelefone } from '@app/helpers/telefone';
 import { Component, EventEmitter, OnInit, OnDestroy, Output } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -83,8 +84,7 @@ export class PerfilDetalheComponent implements OnInit, OnDestroy {
 
     this.form = this.fb.group(
       {
-        userName: [''],
-        imagemURL: [''],
+        userName: ['', Validators.required, usuarioUnico(this.accountService, true)],
         titulo: ['NaoInformado', Validators.required],
         primeiroNome: ['', Validators.required],
         ultimoNome: ['', Validators.required],
@@ -109,6 +109,8 @@ export class PerfilDetalheComponent implements OnInit, OnDestroy {
   }
 
   public atualizarUsuario(): void {
+    this.form.markAllAsTouched();
+    if (this.f.userName.invalid || this.f.userName.pending) return;
     this.formatarNome();
     this.f.phoneNumber.setValue(formatarTelefone(this.f.phoneNumber.value));
     const dadosPerfil = { ...this.form.value };
@@ -129,6 +131,7 @@ export class PerfilDetalheComponent implements OnInit, OnDestroy {
           this.toaster.success('Usuário atualizado!', 'Sucesso');
         },
         (error: any) => {
+          if (error.status === 409) this.f.userName.setErrors({ usuarioExiste: true });
           this.toaster.error('Não foi possível atualizar o perfil.');
           console.error(error);
         }

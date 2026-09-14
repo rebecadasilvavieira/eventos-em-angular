@@ -18,7 +18,7 @@
               style="cursor: pointer; object-fit: cover;">
           </div>
           <div class="card-body">
-            <div class="h4 text-center mb-3">@{{usuario.userName}}</div>
+            <div class="h4 text-center mb-3">@{{usuario.userName | titlecase}}</div>
             <div class="h7 text-bold pb-1"><b>Nome:</b> {{usuario.primeiroNome + ' ' + usuario.ultimoNome}}</div>
             <div class="h7">
               {{usuario.descricao}}

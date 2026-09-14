@@ -7,6 +7,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { AccountService } from '@app/services/account.service';
+import { of } from 'rxjs';
+import { environment } from '@environments/environment';
 
 import { PerfilComponent } from './perfil.component';
 
@@ -32,5 +34,13 @@ describe('PerfilComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  it('usa a foto retornada pelo servidor depois do upload', () => {
+    const reader = { onload: null as any, readAsDataURL: () => reader.onload({ target: { result: 'data:image/png;base64,teste' } }) };
+    spyOn(window, 'FileReader').and.returnValue(reader as any);
+    spyOn(TestBed.inject(AccountService), 'postUpload').and.returnValue(of({ imagemURL: 'nova.png' } as any));
+    component.onFileChange({ target: { files: [new File(['foto'], 'foto.png')] } });
+    expect(component.usuario.imagemURL).toBe('nova.png');
+    expect(component.imagemURL).toBe(environment.apiURL + 'resources/Images/nova.png');
   });
 });
